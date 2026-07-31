@@ -1,6 +1,7 @@
 import {
   Alert,
   Button,
+  Chip,
   CircularProgress,
   Container,
   Dialog,
@@ -12,40 +13,63 @@ import {
   Stack,
   Typography,
 } from '@mui/material'
-import { useQuery } from '@tanstack/react-query'
-import { getAuctionLots } from '@entities/auction-lot'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { listAuctions } from '@entities/auction'
+import { setBet } from '@entities/bet'
 import { BidForm } from '@features/bid-form'
 import { useUiStore } from '@shared/lib/store/useUiStore'
 
+const AUCTIONS_QUERY_KEY = ['auctions']
+
 export function HomePage() {
+  const queryClient = useQueryClient()
   const { data, isPending, isError } = useQuery({
-    queryKey: ['auction-lots'],
-    queryFn: getAuctionLots,
+    queryKey: AUCTIONS_QUERY_KEY,
+    queryFn: () => listAuctions({ per_page: 20 }),
   })
-  const { isBidDialogOpen, openBidDialog, closeBidDialog } = useUiStore()
+  const { isBidDialogOpen, bidDialogAuctionUuid, openBidDialog, closeBidDialog } = useUiStore()
+
+  const bidMutation = useMutation({
+    mutationFn: (price: number) => setBet(bidDialogAuctionUuid!, { price }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: AUCTIONS_QUERY_KEY })
+      closeBidDialog()
+    },
+  })
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Active lots
+        Active auctions
       </Typography>
 
       {isPending && <CircularProgress />}
-      {isError && <Alert severity="error">Failed to load auction lots</Alert>}
+      {isError && <Alert severity="error">Failed to load auctions</Alert>}
+      {bidMutation.isError && <Alert severity="error">Failed to place bid</Alert>}
 
       {data && (
         <List>
-          {data.map((lot) => (
+          {data.data.map((auction) => (
             <ListItem
-              key={lot.id}
+              key={auction.main.order_uid}
               divider
               secondaryAction={
-                <Button size="small" onClick={openBidDialog}>
-                  Bid
-                </Button>
+                auction.trading.can_set_bet && (
+                  <Button size="small" onClick={() => openBidDialog(auction.main.order_uid)}>
+                    Bid
+                  </Button>
+                )
               }
             >
-              <ListItemText primary={lot.title} secondary={`Current bid: $${lot.currentBid}`} />
+              <ListItemText
+                primary={
+                  <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                    <span>{auction.cargo.name}</span>
+                    <Chip size="small" label={auction.trading.status_mobile} />
+                  </Stack>
+                }
+                secondary={`${auction.route.load.city} → ${auction.route.unload.city} · Current bid: ${auction.trading.price?.current ?? '—'} ₽`}
+              />
             </ListItem>
           ))}
         </List>
@@ -55,12 +79,7 @@ export function HomePage() {
         <DialogTitle>Place a bid</DialogTitle>
         <DialogContent>
           <Stack sx={{ pt: 1 }}>
-            <BidForm
-              onSubmit={(values) => {
-                console.info('bid submitted', values)
-                closeBidDialog()
-              }}
-            />
+            <BidForm onSubmit={(values) => bidMutation.mutate(values.price)} />
           </Stack>
         </DialogContent>
       </Dialog>

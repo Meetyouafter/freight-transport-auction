@@ -8,12 +8,14 @@ import { create } from 'zustand'
  */
 interface UiStore {
   isBidDialogOpen: boolean
-  openBidDialog: () => void
+  bidDialogAuctionUuid: string | null
+  openBidDialog: (auctionUuid: string) => void
   closeBidDialog: () => void
 }
 
 export const useUiStore = create<UiStore>((set) => ({
   isBidDialogOpen: false,
-  openBidDialog: () => set({ isBidDialogOpen: true }),
-  closeBidDialog: () => set({ isBidDialogOpen: false }),
+  bidDialogAuctionUuid: null,
+  openBidDialog: (auctionUuid) => set({ isBidDialogOpen: true, bidDialogAuctionUuid: auctionUuid }),
+  closeBidDialog: () => set({ isBidDialogOpen: false, bidDialogAuctionUuid: null }),
 }))

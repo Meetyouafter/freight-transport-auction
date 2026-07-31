@@ -1,0 +1,70 @@
+# Backend / API-слой
+
+Реального бэкенда в проекте нет — фронтенд разрабатывается по контракту из
+`src/mocks/openapi.auctions.v0.json` (OpenAPI 3.0), а вместо upstream-сервера
+запросы перехватывает MSW (Mock Service Worker). Документ описывает, из чего
+состоит этот слой и как впоследствии подключить настоящий бэкенд.
+
+## Контракт
+
+- `src/mocks/openapi.auctions.v0.json` — источник истины. Базовый путь —
+  `/api/v1`.
+- Эндпоинты:
+  - `POST /auctions/list` — список аукционов с фильтрами и пагинацией.
+  - `GET /auctions/{auctionUuid}` — детальная карточка аукциона.
+  - `GET /auctions/{auctionUuid}/bets` — список ставок аукциона.
+  - `POST /auctions/{auctionUuid}/bets` — установить ставку.
+
+## Структура (по слоям FSD)
+
+### `src/entities/auction/` — аукцион
+
+| Файл | Назначение |
+| --- | --- |
+| `model/enums.ts` | Перечисления из `components/schemas` (`AuctionType`, `AuctionStatus`, `TradingStatus` и т.д.). Вынесены отдельно, т.к. переиспользуются и списком, и карточкой аукциона. Там же — комментарии о местах, где в самой спеке одноимённые по смыслу поля имеют разный набор значений (например, `status_mobile` в списке и в карточке — разные enum'ы; это не баг схемы, а точное отражение контракта). |
+| `model/list.ts` | Zod-схемы под `POST /auctions/list`: `AuctionListItem`, `AuctionListRequest` (все фильтры и пагинация), `AuctionListResponseBase`. |
+| `model/show.ts` | Zod-схемы под `GET /auctions/{uuid}`: `AuctionShowResponse` и вся вложенность (маршрут, контакты, допущенные организации). |
+| `api/listAuctions.ts` | Запрос `POST /auctions/list`. |
+| `api/getAuction.ts` | Запрос `GET /auctions/{uuid}`. |
+| `index.ts` | Публичный barrel слайса — единственная точка импорта извне (это требование `eslint-plugin-boundaries`). |
+
+### `src/entities/bet/` — ставки
+
+| Файл | Назначение |
+| --- | --- |
+| `model/types.ts` | `BetItem`, `BetListResponse`, `SetBetRequest`. |
+| `api/listBets.ts` | Запрос `GET /auctions/{uuid}/bets`. |
+| `api/setBet.ts` | Запрос `POST /auctions/{uuid}/bets`. Ответ на этот эндпоинт в спеке не типизирован ("ответ проксируется от upstream") — мок возвращает созданный `BetItem`, это описано комментарием прямо в файле. **При подключении реального бэкенда форму ответа нужно свериться с реальным upstream.** |
+| `index.ts` | Barrel. |
+
+### `src/shared/api/` — общая инфраструктура запросов
+
+| Файл | Назначение |
+| --- | --- |
+| `http.ts` | `apiFetch` — обёртка над `fetch`: базовый URL (`/api/v1`), заголовки, преобразование не-2xx ответа в `ApiError`. Единственное место, которое нужно менять, если поменяется база URL или схема авторизации (например, добавится `Authorization: Bearer`). |
+| `problemDetail.ts` | Схемы формата ошибок API (`ProblemDetail`, `ValidationProblem`) — общий контракт ошибок для всех эндпоинтов, не привязан к конкретной сущности. |
+
+### `src/mocks/` — сам мок-бэкенд (вне слоёв FSD, т.к. ссылается на entities)
+
+| Файл | Назначение |
+| --- | --- |
+| `openapi.auctions.v0.json` | Контракт (см. выше). |
+| `fixtures/auctions.ts` | Начальные данные — несколько аукционов в двух представлениях (`listItem` + `show`), хранятся в памяти процесса и мутируются при ставках. |
+| `fixtures/bets.ts` | Хранилище ставок по аукционам + функции `addBet`/`getBets`. |
+| `handlers/auctions.ts` | MSW-обработчики `POST /auctions/list` (фильтрация/сортировка/пагинация) и `GET /auctions/{uuid}`. |
+| `handlers/bets.ts` | MSW-обработчики `GET`/`POST /auctions/{uuid}/bets`; `POST` реально обновляет фикстуры — новую ставку, текущую цену, статус — так что повторный запрос списка/карточки увидит изменения. |
+| `handlers.ts` | Агрегирует все обработчики в один массив. |
+| `browser.ts` / `server.ts` | Регистрация обработчиков для браузера (dev-режим) и для Node (будущие тесты). |
+
+## Как это включается
+
+`src/mocks/enableMocking.ts` запускает MSW-воркер только при `import.meta.env.DEV`.
+В продакшен-сборке этот код не попадает — ветка статически вычисляется как
+`false` и вырезается бандлером, поэтому мок-слой не увеличивает и не
+затрагивает прод-бандл.
+
+`public/mockServiceWorker.js` — сгенерированный файл, который MSW ставит как
+service worker в браузере. Он не хранится в git (см. `.gitignore`) и
+пересоздаётся автоматически командой `npm run prepare` → `msw init public/ --save`
+(запускается npm-хуком `prepare` при `npm install`). **Не редактировать вручную**
+— при обновлении пакета `msw` файл нужно просто перегенерировать той же командой.

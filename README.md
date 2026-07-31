@@ -75,6 +75,33 @@ intentionally leaves out (full-height root, responsive media defaults).
 
 ## Testing MSW handlers
 
-- `src/mocks/handlers.ts` aggregates all handlers (currently `src/mocks/handlers/auction-lots.ts`).
+- `src/mocks/handlers.ts` aggregates all handlers (currently `src/mocks/handlers/auctions.ts` and
+  `src/mocks/handlers/bets.ts`).
 - `src/mocks/browser.ts` — used by the app in the browser (dev mode).
 - `src/mocks/server.ts` — Node-side MSW server, ready to wire into a test runner (e.g. Vitest) once one is added.
+
+## Auctions API
+
+Implements `src/mocks/openapi.auctions.v0.json`: `POST /auctions/list`, `GET /auctions/{auctionUuid}`,
+`GET /auctions/{auctionUuid}/bets`, `POST /auctions/{auctionUuid}/bets` (base path `/api/v1`).
+
+- `src/entities/auction/` — `model/enums.ts`, `model/list.ts`, `model/show.ts` hold Zod schemas mirroring the
+  OpenAPI `components/schemas` 1:1 (field names kept in the API's own `snake_case`); TS types are inferred from
+  them. `api/listAuctions.ts` and `api/getAuction.ts` are the request functions, one file per endpoint (per
+  "skill"/scenario), exported through `index.ts`.
+- `src/entities/bet/` — same pattern for `BetItem` / `BetListResponse` / `SetBetRequest`, with
+  `api/listBets.ts` and `api/setBet.ts`.
+- `src/shared/api/http.ts` — a small `apiFetch` wrapper (base URL, JSON headers, error mapping) shared by all
+  entity API functions. `src/shared/api/problemDetail.ts` holds the generic `ProblemDetail`/`ValidationProblem`
+  error schemas from the OpenAPI spec.
+- `src/mocks/fixtures/auctions.ts` and `src/mocks/fixtures/bets.ts` hold the in-memory mock state (typed
+  against the real entity schemas). `src/mocks/handlers/auctions.ts` and `src/mocks/handlers/bets.ts` are the
+  MSW handlers; `POST /auctions/{auctionUuid}/bets` mutates that in-memory state (new bet, updated current
+  price, `your` bet info, trading status), so placing a bid is reflected by subsequent `listAuctions` /
+  `getAuction` / `listBets` calls in the same session. Request bodies are validated with the same Zod schemas
+  the client uses, returning a `422` shaped like `ValidationProblem` on mismatch.
+
+Notes on two spec quirks preserved deliberately in the schemas (see comments in `entities/auction/model/enums.ts`):
+the list endpoint's inline `status_mobile` enum has fewer values than the reusable `TradingStatus` component used
+by the detail endpoint and the list filter, and the list filter's `auc_type` enum omits `Unknown`. The two are
+modeled as separate schemas rather than merged, to stay exact to the spec.

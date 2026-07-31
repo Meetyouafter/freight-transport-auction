@@ -1,3 +1,4 @@
-import { auctionLotHandlers } from './handlers/auction-lots'
+import { auctionHandlers } from './handlers/auctions'
+import { betHandlers } from './handlers/bets'
 
-export const handlers = [...auctionLotHandlers]
+export const handlers = [...auctionHandlers, ...betHandlers]

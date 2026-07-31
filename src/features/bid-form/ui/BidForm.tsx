@@ -14,28 +14,20 @@ export function BidForm({ onSubmit }: BidFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<BidFormValues>({
     resolver: zodResolver(bidFormSchema),
-    defaultValues: { amount: 0, comment: '' },
+    defaultValues: { price: 0 },
   })
 
   return (
     <Stack component="form" spacing={2} onSubmit={handleSubmit(onSubmit)} noValidate>
       <TextField
-        label="Bid amount, USD"
+        label="Ставка, ₽"
         type="number"
-        {...register('amount', { valueAsNumber: true })}
-        error={Boolean(errors.amount)}
-        helperText={errors.amount?.message}
-      />
-      <TextField
-        label="Comment"
-        multiline
-        minRows={2}
-        {...register('comment')}
-        error={Boolean(errors.comment)}
-        helperText={errors.comment?.message}
+        {...register('price', { valueAsNumber: true })}
+        error={Boolean(errors.price)}
+        helperText={errors.price?.message}
       />
       <Button type="submit" variant="contained" disabled={isSubmitting}>
-        Place bid
+        Сделать ставку
       </Button>
     </Stack>
   )
