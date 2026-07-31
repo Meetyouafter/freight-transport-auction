@@ -29,9 +29,11 @@ export async function apiFetch<T>(
   path: string,
   init: RequestInit,
   parse: (data: unknown) => T,
+  signal?: AbortSignal,
 ): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    signal,
     headers: {
       'Content-Type': 'application/json',
       ...init.headers,

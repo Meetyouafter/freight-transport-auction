@@ -6,22 +6,27 @@ import {
   Dialog,
   DialogContent,
   DialogTitle,
-  FormControl,
-  InputLabel,
   LinearProgress,
   List,
   ListItem,
   ListItemText,
+  Menu,
   MenuItem,
   Pagination,
-  Select,
   Stack,
   Typography,
 } from '@mui/material'
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { listAuctions } from '@entities/auction'
 import { setBet } from '@entities/bet'
+import {
+  AuctionFiltersPanel,
+  filtersToSearch,
+  mapFiltersToRequest,
+  searchToFilters,
+} from '@features/auction-filters'
 import { BidForm } from '@features/bid-form'
 import { useUiStore } from '@shared/lib/store/useUiStore'
 import { AppButton, EmptyState, ErrorState } from '@shared/ui'
@@ -31,11 +36,16 @@ const PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
 
 export function HomePage() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate({ from: '/' })
+  const search = useSearch({ from: '/' })
+  const filterValues = searchToFilters(search)
+  const appliedFilters = mapFiltersToRequest(filterValues)
   const [page, setPage] = useState(1)
   const [perPage, setPerPage] = useState<(typeof PER_PAGE_OPTIONS)[number]>(10)
+  const [perPageMenuAnchor, setPerPageMenuAnchor] = useState<HTMLElement | null>(null)
   const { data, isPending, isFetching, isError } = useQuery({
-    queryKey: ['auctions', page, perPage],
-    queryFn: () => listAuctions({ page, per_page: perPage }),
+    queryKey: ['auctions', page, perPage, appliedFilters],
+    queryFn: ({ signal }) => listAuctions({ ...appliedFilters, page, per_page: perPage }, signal),
     placeholderData: keepPreviousData,
   })
   const isRefetching = isFetching && !isPending
@@ -55,12 +65,28 @@ export function HomePage() {
         Активные аукционы
       </Typography>
 
-      {isPending && <AuctionListSkeleton />}
+      <AuctionFiltersPanel
+        values={filterValues}
+        onApply={(values) => {
+          navigate({ search: filtersToSearch(values) })
+          setPage(1)
+        }}
+        onReset={() => {
+          navigate({ search: {} })
+          setPage(1)
+        }}
+      />
+
+      {isPending && (
+        <Box sx={{ mt: 3 }}>
+          <AuctionListSkeleton />
+        </Box>
+      )}
       {!isPending && isError && <ErrorState />}
       {bidMutation.isError && <Alert severity="error">Не удалось сделать ставку</Alert>}
 
       {!isPending && !isError && data && (
-        <Box sx={{ position: 'relative' }}>
+        <Box sx={{ position: 'relative', mt: 3 }}>
           {isRefetching && (
             <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0 }} />
           )}
@@ -73,7 +99,13 @@ export function HomePage() {
             }}
           >
             {data.data.length === 0 && (
-              <EmptyState text="На текущий момент нет открытых аукционов" />
+              <EmptyState
+                text={
+                  Object.values(appliedFilters).some((value) => value !== undefined)
+                    ? 'На текущий момент нет открытых аукционов, соответствующих выбранным фильтрам'
+                    : 'На текущий момент нет открытых аукционов'
+                }
+              />
             )}
 
             {data.data.length > 0 && (
@@ -132,24 +164,51 @@ export function HomePage() {
                     disabled={isRefetching}
                   />
                 )}
-                <FormControl size="small" sx={{ minWidth: 120 }} disabled={isRefetching}>
-                  <InputLabel id="per-page-label">На странице</InputLabel>
-                  <Select
-                    labelId="per-page-label"
-                    label="На странице"
-                    value={perPage}
-                    onChange={(event) => {
-                      setPerPage(Number(event.target.value) as (typeof PER_PAGE_OPTIONS)[number])
-                      setPage(1)
+                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    На странице
+                  </Typography>
+                  <AppButton
+                    id="per-page-button"
+                    size="small"
+                    disabled={isRefetching}
+                    onClick={(event) => setPerPageMenuAnchor(event.currentTarget)}
+                  >
+                    {perPage}
+                  </AppButton>
+                  <Menu
+                    anchorEl={perPageMenuAnchor}
+                    open={Boolean(perPageMenuAnchor)}
+                    onClose={() => setPerPageMenuAnchor(null)}
+                    slotProps={{
+                      paper: {
+                        sx: {
+                          bgcolor: 'background.paper',
+                          border: 1,
+                          borderColor: 'divider',
+                          boxShadow: 4,
+                        },
+                      },
+                      list: {
+                        'aria-labelledby': 'per-page-button',
+                      },
                     }}
                   >
                     {PER_PAGE_OPTIONS.map((option) => (
-                      <MenuItem key={option} value={option}>
+                      <MenuItem
+                        key={option}
+                        selected={option === perPage}
+                        onClick={() => {
+                          setPerPage(option)
+                          setPage(1)
+                          setPerPageMenuAnchor(null)
+                        }}
+                      >
                         {option}
                       </MenuItem>
                     ))}
-                  </Select>
-                </FormControl>
+                  </Menu>
+                </Stack>
               </Stack>
             )}
           </Box>
