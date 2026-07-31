@@ -1,0 +1,91 @@
+import type { AuctionShowTrading, AuctionStatus, TradingStatus } from '@entities/auction'
+import type { StatusTokenKey } from '@shared/theme/tokens'
+
+interface StatusLabel {
+  variant: StatusTokenKey
+  label: string
+}
+
+const AUCTION_STATUS_LABELS: Record<AuctionStatus, string> = {
+  Planning: 'Планирование',
+  Auction: 'Торги идут',
+  DeterminateWinner: 'Определение победителя',
+  WaitDeal: 'Ожидание сделки',
+  InProgress: 'В работе',
+  Finished: 'Завершён',
+  Stopped: 'Остановлен',
+  Canceled: 'Отменён',
+  Unknown: 'Неизвестно',
+}
+
+const AUCTION_STATUS_VARIANTS: Record<AuctionStatus, StatusTokenKey> = {
+  Planning: 'neutral',
+  Auction: 'rising',
+  DeterminateWinner: 'waiting',
+  WaitDeal: 'waiting',
+  InProgress: 'confirmed',
+  Finished: 'confirmed',
+  Stopped: 'rejected',
+  Canceled: 'rejected',
+  Unknown: 'neutral',
+}
+
+/** Бейдж статуса сделки — шапка страницы, `AuctionShowTrading.status`. */
+export function dealStatusBadge(status: AuctionStatus): StatusLabel {
+  return { variant: AUCTION_STATUS_VARIANTS[status], label: AUCTION_STATUS_LABELS[status] }
+}
+
+const PARTICIPATION_LABELS: Partial<Record<TradingStatus, StatusLabel>> = {
+  Leading: { variant: 'rising', label: 'Лидирую' },
+  Losing: { variant: 'rejected', label: 'Перебили' },
+  OnPending: { variant: 'waiting', label: 'На рассмотрении' },
+  ChoosingWinner: { variant: 'waiting', label: 'Выбор победителя' },
+  Winner: { variant: 'confirmed', label: 'Выиграл' },
+  Confirmed: { variant: 'confirmed', label: 'Подтверждено' },
+  Accepted: { variant: 'confirmed', label: 'Принято' },
+}
+
+/** Бейдж статуса своего участия — только если пользователь участвует в торгах. */
+export function participationBadge(statusMobile: TradingStatus): StatusLabel | null {
+  return PARTICIPATION_LABELS[statusMobile] ?? null
+}
+
+interface MyBetStatus extends StatusLabel {
+  hint?: string
+}
+
+/** Компактный блок «состояние своей ставки» в sidebar — п.8 спецификации. */
+export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
+  const { your, status_mobile } = trading
+
+  if (!your.bet) {
+    return { variant: 'neutral', label: 'Вы не участвуете' }
+  }
+
+  const amount = your.last_bet_with_vat ?? your.last_bet
+
+  if (your.win) {
+    return { variant: 'confirmed', label: 'Вы выиграли' }
+  }
+  if (status_mobile === 'Losing') {
+    return {
+      variant: 'waiting',
+      label: amount != null ? `Ваша ставка: ${amount} ₽ — перебита` : 'Ваша ставка перебита',
+      hint: 'Текущая цена ниже вашей — обновите ставку',
+    }
+  }
+  if (status_mobile === 'Leading') {
+    return {
+      variant: 'confirmed',
+      label: amount != null ? `Ваша ставка: ${amount} ₽ — лидирует` : 'Ваша ставка лидирует',
+    }
+  }
+  if (trading.status === 'Finished') {
+    return { variant: 'rejected', label: 'Вы проиграли' }
+  }
+
+  return {
+    variant: 'neutral',
+    label: amount != null ? `Ваша ставка: ${amount} ₽` : 'Ставка размещена',
+  }
+}
