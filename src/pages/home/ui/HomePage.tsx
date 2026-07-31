@@ -1,41 +1,30 @@
 import {
-  Alert,
   Box,
-  Chip,
   Container,
-  Dialog,
-  DialogContent,
-  DialogTitle,
   LinearProgress,
-  List,
-  ListItem,
-  ListItemText,
   Menu,
   MenuItem,
   Pagination,
   Stack,
   Typography,
 } from '@mui/material'
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { useState } from 'react'
 import { listAuctions } from '@entities/auction'
-import { setBet } from '@entities/bet'
 import {
   AuctionFiltersPanel,
   filtersToSearch,
   mapFiltersToRequest,
   searchToFilters,
 } from '@features/auction-filters'
-import { BidForm } from '@features/bid-form'
-import { useUiStore } from '@shared/lib/store/useUiStore'
 import { AppButton, EmptyState, ErrorState } from '@shared/ui'
+import { AuctionCard } from '@widgets/auction-card'
 import { AuctionListSkeleton } from './AuctionListSkeleton'
 
 const PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
 
 export function HomePage() {
-  const queryClient = useQueryClient()
   const navigate = useNavigate({ from: '/' })
   const search = useSearch({ from: '/' })
   const filterValues = searchToFilters(search)
@@ -49,15 +38,6 @@ export function HomePage() {
     placeholderData: keepPreviousData,
   })
   const isRefetching = isFetching && !isPending
-  const { isBidDialogOpen, bidDialogAuctionUuid, openBidDialog, closeBidDialog } = useUiStore()
-
-  const bidMutation = useMutation({
-    mutationFn: (price: number) => setBet(bidDialogAuctionUuid!, { price }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auctions'] })
-      closeBidDialog()
-    },
-  })
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -83,7 +63,6 @@ export function HomePage() {
         </Box>
       )}
       {!isPending && isError && <ErrorState />}
-      {bidMutation.isError && <Alert severity="error">Не удалось сделать ставку</Alert>}
 
       {!isPending && !isError && data && (
         <Box sx={{ position: 'relative', mt: 3 }}>
@@ -109,61 +88,26 @@ export function HomePage() {
             )}
 
             {data.data.length > 0 && (
-              <List sx={{ width: '100%' }}>
+              <Stack spacing={2}>
                 {data.data.map((auction) => (
-                  <ListItem
-                    key={auction.main.order_uid}
-                    divider
-                    sx={{
-                      flexDirection: { xs: 'column', sm: 'row' },
-                      alignItems: { xs: 'stretch', sm: 'center' },
-                      gap: { xs: 1, sm: 2 },
-                      py: 2,
-                    }}
-                  >
-                    <ListItemText
-                      sx={{ m: 0, minWidth: 0, wordBreak: 'break-word' }}
-                      primary={
-                        <Stack
-                          direction="row"
-                          spacing={1}
-                          sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}
-                        >
-                          <span>{auction.cargo.name}</span>
-                          <Chip size="small" label={auction.trading.status_mobile} />
-                        </Stack>
-                      }
-                      secondary={`${auction.route.load.city} → ${auction.route.unload.city} · Current bid: ${auction.trading.price?.current ?? '—'} ₽`}
-                    />
-                    {auction.trading.can_set_bet && (
-                      <AppButton
-                        size="small"
-                        onClick={() => openBidDialog(auction.main.order_uid)}
-                        sx={{ alignSelf: { xs: 'stretch', sm: 'center' }, flexShrink: 0 }}
-                      >
-                        Ставка
-                      </AppButton>
-                    )}
-                  </ListItem>
+                  <AuctionCard key={auction.main.order_uid} auction={auction} />
                 ))}
-              </List>
+              </Stack>
             )}
 
-            {data.data.length > 0 && (
+            {data.data.length > 0 && data.meta.total >= 10 && data.meta.last_page > 1 && (
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
                 sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
               >
-                {data.meta.last_page > 1 && (
-                  <Pagination
-                    count={data.meta.last_page}
-                    page={page}
-                    onChange={(_, value) => setPage(value)}
-                    color="primary"
-                    disabled={isRefetching}
-                  />
-                )}
+                <Pagination
+                  count={data.meta.last_page}
+                  page={page}
+                  onChange={(_, value) => setPage(value)}
+                  color="primary"
+                  disabled={isRefetching}
+                />
                 <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                   <Typography variant="body2" color="text.secondary">
                     На странице
@@ -214,15 +158,6 @@ export function HomePage() {
           </Box>
         </Box>
       )}
-
-      <Dialog open={isBidDialogOpen} onClose={closeBidDialog} fullWidth>
-        <DialogTitle>Сделать ставку</DialogTitle>
-        <DialogContent>
-          <Stack sx={{ pt: 1 }}>
-            <BidForm onSubmit={(values) => bidMutation.mutate(values.price)} />
-          </Stack>
-        </DialogContent>
-      </Dialog>
     </Container>
   )
 }

@@ -1,8 +1,25 @@
-import { HttpResponse, http } from 'msw'
-import { auctionListRequestSchema, type AuctionListItem } from '@entities/auction'
+import { HttpResponse, delay, http } from 'msw'
+import {
+  auctionListRequestSchema,
+  type AuctionListItem,
+  type AuctionStatus,
+} from '@entities/auction'
 import { auctionFixtures, findAuctionFixture } from '../fixtures/auctions'
+import { MOCK_DELAY_MS, MOCK_EMPTY, MOCK_ERROR } from '../utils/mockFlags'
 
 const API_BASE = '/api/v1'
+
+const AUCTION_STATUS_IDS: Record<AuctionStatus, number> = {
+  Planning: 1,
+  Auction: 2,
+  DeterminateWinner: 3,
+  WaitDeal: 4,
+  InProgress: 5,
+  Finished: 6,
+  Stopped: 7,
+  Canceled: 8,
+  Unknown: 0,
+}
 
 function matchesFilters(
   item: AuctionListItem,
@@ -17,6 +34,29 @@ function matchesFilters(
   if (filters.auc_type?.length && !filters.auc_type.includes(item.main.auc_type as never))
     return false
   if (filters.status?.length && !filters.status.includes(item.trading.status_mobile as never))
+    return false
+  if (
+    filters.statuses?.length &&
+    !filters.statuses.includes(AUCTION_STATUS_IDS[item.trading.status])
+  )
+    return false
+  if (filters.load_gc_id !== undefined && item.route.load.city_gc_id !== filters.load_gc_id)
+    return false
+  if (filters.unload_gc_id !== undefined && item.route.unload.city_gc_id !== filters.unload_gc_id)
+    return false
+  if (filters.load_date_from && item.route.load.date < filters.load_date_from) return false
+  if (filters.load_date_to && item.route.load.date > filters.load_date_to) return false
+  if (
+    filters.current_price_from !== undefined &&
+    filters.current_price_from !== null &&
+    (item.trading.price?.current ?? 0) < filters.current_price_from
+  )
+    return false
+  if (
+    filters.current_price_to !== undefined &&
+    filters.current_price_to !== null &&
+    (item.trading.price?.current ?? 0) > filters.current_price_to
+  )
     return false
   if (filters.is_favorite !== undefined && item.trading.is_favorite !== filters.is_favorite)
     return false
@@ -57,6 +97,19 @@ function sortItems(
 
 export const auctionHandlers = [
   http.post(`${API_BASE}/auctions/list`, async ({ request }) => {
+    await delay(MOCK_DELAY_MS)
+
+    if (MOCK_ERROR) {
+      return HttpResponse.json(
+        {
+          code: 'internal_error',
+          title: 'Ошибка сервера',
+          message: 'Мок: имитация серверной ошибки',
+        },
+        { status: 500 },
+      )
+    }
+
     const body = request.body ? await request.json().catch(() => ({})) : {}
     const parsed = auctionListRequestSchema.safeParse(body)
 
@@ -80,12 +133,14 @@ export const auctionHandlers = [
     const page = filters.page ?? 1
     const perPage = filters.per_page ?? 20
 
-    const filtered = sortItems(
-      auctionFixtures
-        .map((fixture) => fixture.listItem)
-        .filter((item) => matchesFilters(item, filters)),
-      filters,
-    )
+    const filtered = MOCK_EMPTY
+      ? []
+      : sortItems(
+          auctionFixtures
+            .map((fixture) => fixture.listItem)
+            .filter((item) => matchesFilters(item, filters)),
+          filters,
+        )
     const start = (page - 1) * perPage
     const data = filtered.slice(start, start + perPage)
 
