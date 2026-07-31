@@ -2,23 +2,12 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarTodayOutlined'
 import CallIcon from '@mui/icons-material/CallOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
-import { Paper, Stack, Typography } from '@mui/material'
-import dayjs from 'dayjs'
+import { Stack, Typography } from '@mui/material'
 import { OPERATION_TYPE_LABELS, type RoutePoint } from '@entities/auction'
-import { RestrictedField } from '@shared/ui'
+import { formatDateWindow } from '@shared/lib/format/formatDate'
+import { IconText, RestrictedField, SectionCard } from '@shared/ui'
 
 const INTERMEDIATE_POINT_LABEL = 'Промежуточная точка'
-
-function formatWindow(start: string, end: string) {
-  const from = dayjs(start)
-  const to = dayjs(end)
-
-  if (from.isSame(to, 'day')) {
-    return `${from.format('DD.MM.YYYY')}, ${from.format('HH:mm')}–${to.format('HH:mm')}`
-  }
-
-  return `${from.format('DD.MM.YYYY HH:mm')} – ${to.format('DD.MM.YYYY HH:mm')}`
-}
 
 function pointLabel(point: RoutePoint, index: number, total: number) {
   if (index > 0 && index < total - 1) return INTERMEDIATE_POINT_LABEL
@@ -33,11 +22,7 @@ interface RouteSectionProps {
 
 export function RouteSection({ points, hideAddressAndContacts }: RouteSectionProps) {
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, boxShadow: 4 }}>
-      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
-        Маршрут
-      </Typography>
-
+    <SectionCard title="Маршрут">
       <Stack spacing={2.5}>
         {points.map((point, index) => (
           <Stack key={point.row_num} direction="row" spacing={1.5}>
@@ -52,40 +37,32 @@ export function RouteSection({ points, hideAddressAndContacts }: RouteSectionPro
                 </Typography>
               </Stack>
 
-              <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                <CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                <Typography variant="body2" color="text.secondary">
-                  {formatWindow(point.start_date, point.end_date)}
-                </Typography>
-              </Stack>
+              <IconText icon={<CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
+                {formatDateWindow(point.start_date, point.end_date)}
+              </IconText>
 
               {hideAddressAndContacts ? (
                 <RestrictedField reason="Адрес и контакты станут доступны после подтверждения сделки" />
               ) : (
                 <>
                   {point.location.loading_address && (
-                    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                      <PlaceOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {point.location.loading_address}
-                      </Typography>
-                    </Stack>
+                    <IconText
+                      icon={<PlaceOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
+                    >
+                      {point.location.loading_address}
+                    </IconText>
                   )}
                   {point.contact.name && (
-                    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                      <PersonOutlineIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {point.contact.name}
-                      </Typography>
-                    </Stack>
+                    <IconText
+                      icon={<PersonOutlineIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
+                    >
+                      {point.contact.name}
+                    </IconText>
                   )}
                   {point.contact.phone && (
-                    <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                      <CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {point.contact.phone}
-                      </Typography>
-                    </Stack>
+                    <IconText icon={<CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
+                      {point.contact.phone}
+                    </IconText>
                   )}
                 </>
               )}
@@ -93,6 +70,6 @@ export function RouteSection({ points, hideAddressAndContacts }: RouteSectionPro
           </Stack>
         ))}
       </Stack>
-    </Paper>
+    </SectionCard>
   )
 }

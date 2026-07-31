@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { docsSchema, loadingTypesSchema } from './cargo'
 import {
   auctionStatusSchema,
   auctionTypeSchema,
@@ -38,22 +39,6 @@ export const contactSchema = z.object({
   email: z.string().nullable(),
 })
 export type Contact = z.infer<typeof contactSchema>
-
-/** `LoadingTypes`. */
-export const loadingTypesSchema = z.object({
-  side: z.boolean(),
-  top: z.boolean(),
-  rear: z.boolean(),
-  full: z.boolean(),
-})
-
-/** `Docs`. */
-export const docsSchema = z.object({
-  tir: z.boolean(),
-  cmr: z.boolean(),
-  t1: z.boolean(),
-  med: z.boolean(),
-})
 
 /** `CarRequirements` — nullable at the schema level, null when no requirements are set. */
 export const carRequirementsSchema = z

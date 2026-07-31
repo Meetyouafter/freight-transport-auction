@@ -1,8 +1,8 @@
 import CallIcon from '@mui/icons-material/CallOutlined'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
-import { Paper, Stack, Typography } from '@mui/material'
+import { Stack, Typography } from '@mui/material'
 import type { AuctionShowResponse, Contact } from '@entities/auction'
-import { RestrictedField } from '@shared/ui'
+import { IconText, RestrictedField, SectionCard } from '@shared/ui'
 
 interface OrganizerSectionProps {
   organizer: AuctionShowResponse['organizer']
@@ -12,11 +12,7 @@ interface OrganizerSectionProps {
 
 export function OrganizerSection({ organizer, contacts, hideContacts }: OrganizerSectionProps) {
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, boxShadow: 4 }}>
-      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
-        Организатор
-      </Typography>
-
+    <SectionCard title="Организатор">
       <Stack spacing={1.5}>
         <Typography variant="body1">{organizer.organization_name}</Typography>
         <Typography variant="body2" color="text.secondary">
@@ -31,20 +27,16 @@ export function OrganizerSection({ organizer, contacts, hideContacts }: Organize
               <Stack key={contact.uid ?? contact.phone ?? contact.name} spacing={0.5}>
                 {contact.name && <Typography variant="body2">{contact.name}</Typography>}
                 {contact.phone && (
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                    <CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {contact.phone}
-                    </Typography>
-                  </Stack>
+                  <IconText icon={<CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
+                    {contact.phone}
+                  </IconText>
                 )}
                 {contact.email && (
-                  <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-                    <EmailOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {contact.email}
-                    </Typography>
-                  </Stack>
+                  <IconText
+                    icon={<EmailOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
+                  >
+                    {contact.email}
+                  </IconText>
                 )}
               </Stack>
             ))}
@@ -55,6 +47,6 @@ export function OrganizerSection({ organizer, contacts, hideContacts }: Organize
           </Typography>
         )}
       </Stack>
-    </Paper>
+    </SectionCard>
   )
 }

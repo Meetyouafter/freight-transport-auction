@@ -8,7 +8,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import 'dayjs/locale/ru'
 import type { PropsWithChildren } from 'react'
 import { queryClient } from '@shared/api/query-client'
-import { theme, GlobalReset } from '@shared/theme'
+import { theme } from '@shared/theme'
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -20,7 +20,6 @@ export function AppProviders({ children }: PropsWithChildren) {
           localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}
         >
           <CssBaseline />
-          <GlobalReset />
           {children}
           <ReactQueryDevtools initialIsOpen={false} />
         </LocalizationProvider>

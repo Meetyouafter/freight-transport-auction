@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { auctionQueryOptions, type AuctionShowTrading } from '@entities/auction'
 import { setBet } from '@entities/bet'
 import { BidForm, type BidFormValues } from '@features/bid-form'
+import { formatPrice } from '@shared/lib/format/formatPrice'
 import { colorTokens } from '@shared/theme/tokens'
 import { MyBetStatus } from './MyBetStatus'
 
@@ -26,11 +27,11 @@ export function TradingSidebar({ auctionUuid, trading }: TradingSidebarProps) {
     <Stack spacing={2}>
       <Box>
         <Typography sx={{ fontSize: 24, fontWeight: 500, color: 'text.primary' }}>
-          {price.current != null ? `${price.current} ₽` : '—'}
+          {formatPrice(price.current)}
         </Typography>
         {price.available != null && (
           <Typography variant="caption" sx={{ color: colorTokens.moss, display: 'block' }}>
-            Стартовая цена организатора: {price.available} ₽
+            Стартовая цена организатора: {formatPrice(price.available)}
           </Typography>
         )}
       </Box>

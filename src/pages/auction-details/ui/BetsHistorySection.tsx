@@ -1,8 +1,9 @@
-import { List, ListItem, Paper, Skeleton, Stack, Typography } from '@mui/material'
+import { List, ListItem, Skeleton, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
-import dayjs from 'dayjs'
 import { listBets } from '@entities/bet'
-import { EmptyState, RestrictedField } from '@shared/ui'
+import { formatDateTime } from '@shared/lib/format/formatDate'
+import { formatPrice } from '@shared/lib/format/formatPrice'
+import { EmptyState, RestrictedField, SectionCard } from '@shared/ui'
 
 interface BetsHistorySectionProps {
   auctionUuid: string
@@ -17,11 +18,7 @@ export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionPr
   })
 
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, boxShadow: 4 }}>
-      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
-        История ставок
-      </Typography>
-
+    <SectionCard title="История ставок">
       {hidden && <RestrictedField reason="История ставок скрыта организатором" />}
 
       {!hidden && isPending && (
@@ -52,15 +49,15 @@ export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionPr
                 sx={{ display: 'flex', justifyContent: 'space-between' }}
               >
                 <Typography variant="body2" color="text.secondary">
-                  {dayjs(bet.created_at).format('DD.MM.YYYY HH:mm')}
+                  {formatDateTime(bet.created_at)}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {bet.price_with_vat} ₽
+                  {formatPrice(bet.price_with_vat)}
                 </Typography>
               </ListItem>
             ))}
           </List>
         ))}
-    </Paper>
+    </SectionCard>
   )
 }

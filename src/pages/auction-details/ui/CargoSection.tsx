@@ -1,6 +1,6 @@
-import { Chip, Divider, Paper, Stack, Typography } from '@mui/material'
+import { Chip, Divider, Stack, Typography } from '@mui/material'
 import type { AuctionShowResponse } from '@entities/auction'
-import { RestrictedField } from '@shared/ui'
+import { RestrictedField, SectionCard } from '@shared/ui'
 import { DOC_LABELS, LOADING_LABELS } from '../model/labels'
 
 interface CargoSectionProps {
@@ -22,11 +22,7 @@ export function CargoSection({
   const activeLoadingTypes = Object.entries(cargo.loading_types).filter(([, value]) => value)
 
   return (
-    <Paper variant="outlined" sx={{ p: { xs: 2, sm: 3 }, borderRadius: 2, boxShadow: 4 }}>
-      <Typography variant="subtitle1" component="h2" sx={{ fontWeight: 600, mb: 2 }}>
-        Груз и требования к ТС
-      </Typography>
-
+    <SectionCard title="Груз и требования к ТС">
       <Stack spacing={1.5}>
         <Typography variant="body1">
           {cargoName ?? 'Груз'}
@@ -92,6 +88,6 @@ export function CargoSection({
           <RestrictedField reason="Стоимость груза скрыта организатором" />
         )}
       </Stack>
-    </Paper>
+    </SectionCard>
   )
 }

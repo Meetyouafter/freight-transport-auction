@@ -1,5 +1,8 @@
 export { AppButton } from './AppButton/AppButton'
 export { EmptyState } from './EmptyState/EmptyState'
 export { ErrorState } from './ErrorState/ErrorState'
+export { IconText } from './IconText/IconText'
 export { Loader } from './Loader/Loader'
+export { PerPageSelect } from './PerPageSelect/PerPageSelect'
 export { RestrictedField } from './RestrictedField/RestrictedField'
+export { SectionCard } from './SectionCard/SectionCard'

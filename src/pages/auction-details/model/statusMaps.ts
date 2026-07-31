@@ -5,6 +5,7 @@ import {
   type AuctionStatus,
   type TradingStatus,
 } from '@entities/auction'
+import { formatPrice } from '@shared/lib/format/formatPrice'
 import type { StatusTokenKey } from '@shared/theme/tokens'
 
 interface StatusLabel {
@@ -52,14 +53,16 @@ export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
   if (status_mobile === 'Losing') {
     return {
       variant: 'waiting',
-      label: amount != null ? `Ваша ставка: ${amount} ₽ — перебита` : 'Ваша ставка перебита',
+      label:
+        amount != null ? `Ваша ставка: ${formatPrice(amount)} — перебита` : 'Ваша ставка перебита',
       hint: 'Текущая цена ниже вашей — обновите ставку',
     }
   }
   if (status_mobile === 'Leading') {
     return {
       variant: 'confirmed',
-      label: amount != null ? `Ваша ставка: ${amount} ₽ — лидирует` : 'Ваша ставка лидирует',
+      label:
+        amount != null ? `Ваша ставка: ${formatPrice(amount)} — лидирует` : 'Ваша ставка лидирует',
     }
   }
   if (trading.status === 'Finished') {
@@ -68,6 +71,6 @@ export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
 
   return {
     variant: 'neutral',
-    label: amount != null ? `Ваша ставка: ${amount} ₽` : 'Ставка размещена',
+    label: amount != null ? `Ваша ставка: ${formatPrice(amount)}` : 'Ставка размещена',
   }
 }

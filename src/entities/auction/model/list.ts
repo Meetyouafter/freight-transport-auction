@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { docsSchema, loadingTypesSchema } from './cargo'
 import {
   auctionStatusSchema,
   auctionTypeFilterSchema,
@@ -46,22 +47,6 @@ export const auctionListItemRouteSchema = z.object({
   unload: auctionListItemRoutePointSchema,
 })
 
-/** `AuctionListItemCargoLoadingType`. */
-export const auctionListItemCargoLoadingTypeSchema = z.object({
-  side: z.boolean(),
-  top: z.boolean(),
-  rear: z.boolean(),
-  full: z.boolean(),
-})
-
-/** `AuctionListItemCargoDocs`. */
-export const auctionListItemCargoDocsSchema = z.object({
-  tir: z.boolean(),
-  cmr: z.boolean(),
-  t1: z.boolean(),
-  med: z.boolean(),
-})
-
 /** `AuctionListItemCargoCar` — vehicle requirements; parent `car` is null when unset. */
 export const auctionListItemCargoCarSchema = z.object({
   type: z.string(),
@@ -92,8 +77,8 @@ export const auctionListItemCargoSchema = z.object({
   additional_load: z.boolean().nullable(),
   temp_from: z.number().int().nullable(),
   temp_to: z.number().int().nullable(),
-  loading_types: auctionListItemCargoLoadingTypeSchema,
-  docs: auctionListItemCargoDocsSchema,
+  loading_types: loadingTypesSchema,
+  docs: docsSchema,
   car: auctionListItemCargoCarSchema.nullable(),
 })
 

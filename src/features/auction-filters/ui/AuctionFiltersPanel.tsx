@@ -1,24 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import CheckIcon from '@mui/icons-material/Check'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import FilterListIcon from '@mui/icons-material/FilterList'
 import {
   Autocomplete,
   Badge,
   Box,
-  Chip,
   Collapse,
   Divider,
-  FormControlLabel,
   Paper,
   Stack,
-  Switch,
   TextField,
   Typography,
 } from '@mui/material'
-import type { AutocompleteRenderValueGetItemProps } from '@mui/material'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
-import dayjs from 'dayjs'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { CITIES, type City } from '@entities/city'
@@ -30,54 +23,9 @@ import {
   defaultAuctionFiltersFormValues,
   type AuctionFiltersFormValues,
 } from '../model/schema'
-
-function renderMultiOption(
-  props: React.HTMLAttributes<HTMLLIElement> & { key: React.Key },
-  label: string,
-  selected: boolean,
-) {
-  const { key, ...rest } = props
-
-  return (
-    <li key={key} {...rest}>
-      <Stack
-        direction="row"
-        spacing={1}
-        sx={{ alignItems: 'center', width: '100%', justifyContent: 'space-between' }}
-      >
-        <span>{label}</span>
-        {selected && <CheckIcon fontSize="small" color="primary" />}
-      </Stack>
-    </li>
-  )
-}
-
-const singleLineTagsSx = {
-  '& .MuiAutocomplete-inputRoot': {
-    flexWrap: 'nowrap',
-  },
-  '& .MuiAutocomplete-inputRoot:not(.Mui-focused) .MuiAutocomplete-input': {
-    width: 0,
-    minWidth: 0,
-    padding: 0,
-  },
-} as const
-
-function renderLimitedTags<T extends { label: string }>(
-  options: T[],
-  getItemProps: AutocompleteRenderValueGetItemProps<true>,
-) {
-  const [first, ...rest] = options
-
-  if (!first) return null
-
-  return (
-    <>
-      <Chip size="small" label={first.label} {...getItemProps({ index: 0 })} />
-      {rest.length > 0 && <Chip size="small" label={`+${rest.length}`} />}
-    </>
-  )
-}
+import { DateFilterField } from './DateFilterField'
+import { MultiSelectFilterField } from './MultiSelectFilterField'
+import { SwitchFilterField } from './SwitchFilterField'
 
 interface AuctionFiltersPanelProps {
   values: AuctionFiltersFormValues
@@ -175,25 +123,14 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="auc_type"
                 control={control}
                 render={({ field }) => (
-                  <Autocomplete
-                    multiple
-                    fullWidth
-                    size="small"
-                    disableCloseOnSelect
-                    sx={singleLineTagsSx}
+                  <MultiSelectFilterField
+                    label="Тип аукциона"
                     options={AUC_TYPE_OPTIONS}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option.value === value.value}
                     value={AUC_TYPE_OPTIONS.filter((option) => field.value.includes(option.value))}
-                    onChange={(_, selected) => {
+                    onChange={(selected) => {
                       field.onChange(selected.map((option) => option.value))
                       void submit()
                     }}
-                    renderOption={(props, option, { selected }) =>
-                      renderMultiOption(props, option.label, selected)
-                    }
-                    renderValue={renderLimitedTags}
-                    renderInput={(params) => <TextField {...params} label="Тип аукциона" />}
                   />
                 )}
               />
@@ -201,25 +138,14 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="status"
                 control={control}
                 render={({ field }) => (
-                  <Autocomplete
-                    multiple
-                    fullWidth
-                    size="small"
-                    disableCloseOnSelect
-                    sx={singleLineTagsSx}
+                  <MultiSelectFilterField
+                    label="Статус торгов"
                     options={STATUS_OPTIONS}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option.value === value.value}
                     value={STATUS_OPTIONS.filter((option) => field.value.includes(option.value))}
-                    onChange={(_, selected) => {
+                    onChange={(selected) => {
                       field.onChange(selected.map((option) => option.value))
                       void submit()
                     }}
-                    renderOption={(props, option, { selected }) =>
-                      renderMultiOption(props, option.label, selected)
-                    }
-                    renderValue={renderLimitedTags}
-                    renderInput={(params) => <TextField {...params} label="Статус торгов" />}
                   />
                 )}
               />
@@ -227,27 +153,16 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="statuses"
                 control={control}
                 render={({ field }) => (
-                  <Autocomplete
-                    multiple
-                    fullWidth
-                    size="small"
-                    disableCloseOnSelect
-                    sx={singleLineTagsSx}
+                  <MultiSelectFilterField
+                    label="Статус аукциона"
                     options={AUCTION_STATUS_OPTIONS}
-                    getOptionLabel={(option) => option.label}
-                    isOptionEqualToValue={(option, value) => option.value === value.value}
                     value={AUCTION_STATUS_OPTIONS.filter((option) =>
                       field.value.includes(option.value),
                     )}
-                    onChange={(_, selected) => {
+                    onChange={(selected) => {
                       field.onChange(selected.map((option) => option.value))
                       void submit()
                     }}
-                    renderOption={(props, option, { selected }) =>
-                      renderMultiOption(props, option.label, selected)
-                    }
-                    renderValue={renderLimitedTags}
-                    renderInput={(params) => <TextField {...params} label="Статус аукциона" />}
                   />
                 )}
               />
@@ -303,15 +218,13 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="load_date_from"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker
+                  <DateFilterField
                     label="Дата погрузки от"
-                    format="DD.MM.YYYY"
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(date) => {
-                      field.onChange(date?.isValid() ? date.format('YYYY-MM-DD') : '')
+                    value={field.value}
+                    onChange={(value) => {
+                      field.onChange(value)
                       void submit()
                     }}
-                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
                   />
                 )}
               />
@@ -319,15 +232,13 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="load_date_to"
                 control={control}
                 render={({ field }) => (
-                  <DatePicker
+                  <DateFilterField
                     label="Дата погрузки до"
-                    format="DD.MM.YYYY"
-                    value={field.value ? dayjs(field.value) : null}
-                    onChange={(date) => {
-                      field.onChange(date?.isValid() ? date.format('YYYY-MM-DD') : '')
+                    value={field.value}
+                    onChange={(value) => {
+                      field.onChange(value)
                       void submit()
                     }}
-                    slotProps={{ textField: { size: 'small', fullWidth: true } }}
                   />
                 )}
               />
@@ -359,18 +270,13 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="is_favorite"
                 control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    sx={{ ml: 0 }}
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.checked)
-                          void submit()
-                        }}
-                      />
-                    }
+                  <SwitchFilterField
                     label="Избранные"
+                    checked={field.value}
+                    onChange={(checked) => {
+                      field.onChange(checked)
+                      void submit()
+                    }}
                   />
                 )}
               />
@@ -378,18 +284,13 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="is_bidder"
                 control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    sx={{ ml: 0 }}
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.checked)
-                          void submit()
-                        }}
-                      />
-                    }
+                  <SwitchFilterField
                     label="Я участвую"
+                    checked={field.value}
+                    onChange={(checked) => {
+                      field.onChange(checked)
+                      void submit()
+                    }}
                   />
                 )}
               />
@@ -397,18 +298,13 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                 name="is_available"
                 control={control}
                 render={({ field }) => (
-                  <FormControlLabel
-                    sx={{ ml: 0 }}
-                    control={
-                      <Switch
-                        checked={field.value}
-                        onChange={(e) => {
-                          field.onChange(e.target.checked)
-                          void submit()
-                        }}
-                      />
-                    }
+                  <SwitchFilterField
                     label="Доступные"
+                    checked={field.value}
+                    onChange={(checked) => {
+                      field.onChange(checked)
+                      void submit()
+                    }}
                   />
                 )}
               />

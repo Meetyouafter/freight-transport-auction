@@ -10,18 +10,12 @@
 
 import { Route as rootRouteImport } from './../routes/__root'
 import { Route as IndexRouteImport } from './../routes/index'
-import { Route as AuctionsIndexRouteImport } from './../routes/auctions/index'
 import { Route as AuctionsAuctionIdIndexRouteImport } from './../routes/auctions/$auctionId/index'
 import { Route as AuctionsAuctionIdBidRouteImport } from './../routes/auctions/$auctionId/bid'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuctionsIndexRoute = AuctionsIndexRouteImport.update({
-  id: '/auctions/',
-  path: '/auctions/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuctionsAuctionIdIndexRoute = AuctionsAuctionIdIndexRouteImport.update({
@@ -37,40 +31,30 @@ const AuctionsAuctionIdBidRoute = AuctionsAuctionIdBidRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auctions/': typeof AuctionsIndexRoute
   '/auctions/$auctionId/bid': typeof AuctionsAuctionIdBidRoute
   '/auctions/$auctionId/': typeof AuctionsAuctionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auctions': typeof AuctionsIndexRoute
   '/auctions/$auctionId/bid': typeof AuctionsAuctionIdBidRoute
   '/auctions/$auctionId': typeof AuctionsAuctionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auctions/': typeof AuctionsIndexRoute
   '/auctions/$auctionId/bid': typeof AuctionsAuctionIdBidRoute
   '/auctions/$auctionId/': typeof AuctionsAuctionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    '/' | '/auctions/' | '/auctions/$auctionId/bid' | '/auctions/$auctionId/'
+  fullPaths: '/' | '/auctions/$auctionId/bid' | '/auctions/$auctionId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auctions' | '/auctions/$auctionId/bid' | '/auctions/$auctionId'
-  id:
-    | '__root__'
-    | '/'
-    | '/auctions/'
-    | '/auctions/$auctionId/bid'
-    | '/auctions/$auctionId/'
+  to: '/' | '/auctions/$auctionId/bid' | '/auctions/$auctionId'
+  id: '__root__' | '/' | '/auctions/$auctionId/bid' | '/auctions/$auctionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuctionsIndexRoute: typeof AuctionsIndexRoute
   AuctionsAuctionIdBidRoute: typeof AuctionsAuctionIdBidRoute
   AuctionsAuctionIdIndexRoute: typeof AuctionsAuctionIdIndexRoute
 }
@@ -82,13 +66,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auctions/': {
-      id: '/auctions/'
-      path: '/auctions'
-      fullPath: '/auctions/'
-      preLoaderRoute: typeof AuctionsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auctions/$auctionId/': {
@@ -110,7 +87,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuctionsIndexRoute: AuctionsIndexRoute,
   AuctionsAuctionIdBidRoute: AuctionsAuctionIdBidRoute,
   AuctionsAuctionIdIndexRoute: AuctionsAuctionIdIndexRoute,
 }

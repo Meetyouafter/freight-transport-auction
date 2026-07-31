@@ -1,70 +1,16 @@
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CalendarTodayIcon from '@mui/icons-material/CalendarTodayOutlined'
 import EastIcon from '@mui/icons-material/East'
 import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
-import dayjs from 'dayjs'
-import {
-  auctionQueryOptions,
-  TRADING_STATUS_MOBILE_LABELS,
-  type AuctionListItem,
-} from '@entities/auction'
+import { auctionQueryOptions, type AuctionListItem } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
-import { cardTokens, type StatusTokenKey } from '@shared/theme/tokens'
-import { AppButton } from '@shared/ui'
-import { MAX_SECONDARY_BADGES } from '../model/constants'
+import { formatDate } from '@shared/lib/format/formatDate'
+import { formatPrice } from '@shared/lib/format/formatPrice'
+import { cardTokens } from '@shared/theme/tokens'
+import { AppButton, IconText } from '@shared/ui'
+import { getPrimaryBadge, getSecondaryBadges } from '../model/badges'
 import { StatusBadge } from './StatusBadge'
-
-function formatDate(date: string) {
-  return dayjs(date).format('DD.MM.YYYY')
-}
-
-interface Badge {
-  variant: StatusTokenKey
-  label: string
-  icon?: React.ReactNode
-}
-
-function getPrimaryBadge(auction: AuctionListItem): Badge | null {
-  const { trading } = auction
-
-  if (trading.status_mobile === 'Confirmed') {
-    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Confirmed }
-  }
-  if (trading.status_mobile === 'Winner') {
-    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Winner }
-  }
-  if (trading.status === 'Canceled' || trading.status === 'Stopped') {
-    return { variant: 'rejected', label: trading.status === 'Canceled' ? 'Отменён' : 'Остановлен' }
-  }
-  if (trading.status_mobile === 'Losing') {
-    return { variant: 'rejected', label: TRADING_STATUS_MOBILE_LABELS.Losing }
-  }
-
-  return null
-}
-
-function getSecondaryBadges(auction: AuctionListItem, hasMyBid: boolean): Badge[] {
-  const { main, trading } = auction
-  const badges: Badge[] = []
-
-  if (main.auc_type === 'Up' && trading.status === 'Auction') {
-    badges.push({
-      variant: 'rising',
-      label: 'На повышение',
-      icon: <ArrowUpwardIcon sx={{ fontSize: 14 }} />,
-    })
-  }
-  if (trading.status === 'WaitDeal') {
-    badges.push({ variant: 'waiting', label: 'Ожидание сделки' })
-  }
-  if (!hasMyBid) {
-    badges.push({ variant: 'neutral', label: 'Моей ставки нет' })
-  }
-
-  return badges.slice(0, MAX_SECONDARY_BADGES)
-}
 
 interface AuctionCardProps {
   auction: AuctionListItem
@@ -140,18 +86,12 @@ export function AuctionCard({ auction }: AuctionCardProps) {
           spacing={2}
           sx={{ alignItems: 'center', flexWrap: 'wrap', rowGap: 0.5 }}
         >
-          <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-            <CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Погрузка {formatDate(route.load.date)}
-            </Typography>
-          </Stack>
-          <Stack direction="row" spacing={0.5} sx={{ alignItems: 'center' }}>
-            <CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Выгрузка {formatDate(route.unload.date)}
-            </Typography>
-          </Stack>
+          <IconText icon={<CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
+            Погрузка {formatDate(route.load.date)}
+          </IconText>
+          <IconText icon={<CalendarTodayIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
+            Выгрузка {formatDate(route.unload.date)}
+          </IconText>
         </Stack>
 
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -174,7 +114,7 @@ export function AuctionCard({ auction }: AuctionCardProps) {
       >
         <Box>
           <Typography sx={{ fontSize: { xs: 22, sm: 24 }, fontWeight: 500, color: 'text.primary' }}>
-            {trading.price?.current != null ? `${trading.price.current} ₽` : '—'}
+            {formatPrice(trading.price?.current)}
           </Typography>
           {main.price_per_km != null && (
             <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>

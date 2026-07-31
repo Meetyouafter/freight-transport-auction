@@ -1,16 +1,6 @@
-import {
-  Box,
-  Container,
-  LinearProgress,
-  Menu,
-  MenuItem,
-  Pagination,
-  Stack,
-  Typography,
-} from '@mui/material'
+import { Box, Container, LinearProgress, Pagination, Stack, Typography } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { useState } from 'react'
 import { listAuctions } from '@entities/auction'
 import {
   AuctionFiltersPanel,
@@ -19,7 +9,8 @@ import {
   searchToFilters,
 } from '@features/auction-filters'
 import { ROUTES } from '@shared/config/routes'
-import { AppButton, EmptyState, ErrorState } from '@shared/ui'
+import { usePagination } from '@shared/lib/pagination/usePagination'
+import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
 import { AuctionListSkeleton } from './AuctionListSkeleton'
@@ -29,9 +20,9 @@ export function HomePage() {
   const search = useSearch({ from: ROUTES.home })
   const filterValues = searchToFilters(search)
   const appliedFilters = mapFiltersToRequest(filterValues)
-  const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState<(typeof PER_PAGE_OPTIONS)[number]>(DEFAULT_PAGE_SIZE)
-  const [perPageMenuAnchor, setPerPageMenuAnchor] = useState<HTMLElement | null>(null)
+  const { page, perPage, setPage, changePerPage, resetPage } = usePagination<
+    (typeof PER_PAGE_OPTIONS)[number]
+  >({ defaultPerPage: DEFAULT_PAGE_SIZE })
   const { data, isPending, isFetching, isError } = useQuery({
     queryKey: ['auctions', page, perPage, appliedFilters],
     queryFn: ({ signal }) => listAuctions({ ...appliedFilters, page, per_page: perPage }, signal),
@@ -49,11 +40,11 @@ export function HomePage() {
         values={filterValues}
         onApply={(values) => {
           navigate({ search: filtersToSearch(values) })
-          setPage(1)
+          resetPage()
         }}
         onReset={() => {
           navigate({ search: {} })
-          setPage(1)
+          resetPage()
         }}
       />
 
@@ -107,51 +98,12 @@ export function HomePage() {
                 color="primary"
                 disabled={isRefetching}
               />
-              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
-                  На странице
-                </Typography>
-                <AppButton
-                  id="per-page-button"
-                  size="small"
-                  disabled={isRefetching}
-                  onClick={(event) => setPerPageMenuAnchor(event.currentTarget)}
-                >
-                  {perPage}
-                </AppButton>
-                <Menu
-                  anchorEl={perPageMenuAnchor}
-                  open={Boolean(perPageMenuAnchor)}
-                  onClose={() => setPerPageMenuAnchor(null)}
-                  slotProps={{
-                    paper: {
-                      sx: {
-                        bgcolor: 'background.paper',
-                        border: 1,
-                        borderColor: 'divider',
-                        boxShadow: 4,
-                      },
-                    },
-                    list: {
-                      'aria-labelledby': 'per-page-button',
-                    },
-                  }}
-                >
-                  {PER_PAGE_OPTIONS.map((option) => (
-                    <MenuItem
-                      key={option}
-                      selected={option === perPage}
-                      onClick={() => {
-                        setPerPage(option)
-                        setPage(1)
-                        setPerPageMenuAnchor(null)
-                      }}
-                    >
-                      {option}
-                    </MenuItem>
-                  ))}
-                </Menu>
-              </Stack>
+              <PerPageSelect
+                options={PER_PAGE_OPTIONS}
+                value={perPage}
+                onChange={changePerPage}
+                disabled={isRefetching}
+              />
             </Stack>
           </Box>
         </Box>

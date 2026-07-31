@@ -69,10 +69,6 @@ tokens and provided via `ThemeProvider` in `src/app/providers/AppProviders.tsx`.
 referencing `theme.palette.*` / `theme.spacing()` / `theme.shape.borderRadius`, so the whole app
 stays reskinnable from one file.
 
-Browser reset: MUI's `<CssBaseline />` handles the standard reset (margins, box-sizing, base
-typography). `src/shared/theme/GlobalReset.tsx` adds the few app-level additions CssBaseline
-intentionally leaves out (full-height root, responsive media defaults).
-
 ## Testing MSW handlers
 
 - `src/mocks/handlers.ts` aggregates all handlers (currently `src/mocks/handlers/auctions.ts` and

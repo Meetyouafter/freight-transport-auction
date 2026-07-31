@@ -1,7 +1,6 @@
 import { Box, CircularProgress, useTheme } from '@mui/material'
 
 interface LoaderProps {
-  /** Covers the whole viewport as a fixed overlay instead of centering within its parent. */
   fullScreen?: boolean
   size?: number
 }

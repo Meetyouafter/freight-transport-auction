@@ -5,6 +5,7 @@ import { Link, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import { auctionQueryOptions } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
+import { formatPrice } from '@shared/lib/format/formatPrice'
 import { ErrorState } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 import { dealStatusBadge, participationBadge } from '../model/statusMaps'
@@ -55,19 +56,20 @@ export function AuctionDetailsPage() {
     <Container maxWidth="lg" sx={{ py: 4, pb: { xs: 12, md: 4 } }}>
       <Stack spacing={1} sx={{ mb: 3 }}>
         <Box>
-          <Link
+          <Box
+            component={Link}
             to={ROUTES.home}
-            style={{
+            sx={{
               display: 'inline-flex',
               alignItems: 'center',
-              gap: 4,
+              gap: 0.5,
               textDecoration: 'none',
               color: 'inherit',
             }}
           >
             <ArrowBackIcon sx={{ fontSize: 18 }} />
             <Typography variant="body2">К списку аукционов</Typography>
-          </Link>
+          </Box>
         </Box>
 
         <Stack direction="row" spacing={1.5} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
@@ -143,7 +145,7 @@ export function AuctionDetailsPage() {
       >
         <Box>
           <Typography sx={{ fontSize: 20, fontWeight: 500 }}>
-            {trading.price.current != null ? `${trading.price.current} ₽` : '—'}
+            {formatPrice(trading.price.current)}
           </Typography>
         </Box>
         <Typography variant="body2" color="primary" sx={{ fontWeight: 600 }}>
