@@ -20,9 +20,8 @@ import {
 } from '@features/auction-filters'
 import { AppButton, EmptyState, ErrorState } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
+import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
 import { AuctionListSkeleton } from './AuctionListSkeleton'
-
-const PER_PAGE_OPTIONS = [10, 20, 50, 100] as const
 
 export function HomePage() {
   const navigate = useNavigate({ from: '/' })
@@ -30,7 +29,7 @@ export function HomePage() {
   const filterValues = searchToFilters(search)
   const appliedFilters = mapFiltersToRequest(filterValues)
   const [page, setPage] = useState(1)
-  const [perPage, setPerPage] = useState<(typeof PER_PAGE_OPTIONS)[number]>(10)
+  const [perPage, setPerPage] = useState<(typeof PER_PAGE_OPTIONS)[number]>(DEFAULT_PAGE_SIZE)
   const [perPageMenuAnchor, setPerPageMenuAnchor] = useState<HTMLElement | null>(null)
   const { data, isPending, isFetching, isError } = useQuery({
     queryKey: ['auctions', page, perPage, appliedFilters],
@@ -95,66 +94,64 @@ export function HomePage() {
               </Stack>
             )}
 
-            {data.data.length > 0 && data.meta.total >= 10 && data.meta.last_page > 1 && (
-              <Stack
-                direction={{ xs: 'column', sm: 'row' }}
-                spacing={2}
-                sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
-              >
-                <Pagination
-                  count={data.meta.last_page}
-                  page={page}
-                  onChange={(_, value) => setPage(value)}
-                  color="primary"
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
+            >
+              <Pagination
+                count={data.meta.last_page}
+                page={page}
+                onChange={(_, value) => setPage(value)}
+                color="primary"
+                disabled={isRefetching}
+              />
+              <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                <Typography variant="body2" color="text.secondary">
+                  На странице
+                </Typography>
+                <AppButton
+                  id="per-page-button"
+                  size="small"
                   disabled={isRefetching}
-                />
-                <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
-                    На странице
-                  </Typography>
-                  <AppButton
-                    id="per-page-button"
-                    size="small"
-                    disabled={isRefetching}
-                    onClick={(event) => setPerPageMenuAnchor(event.currentTarget)}
-                  >
-                    {perPage}
-                  </AppButton>
-                  <Menu
-                    anchorEl={perPageMenuAnchor}
-                    open={Boolean(perPageMenuAnchor)}
-                    onClose={() => setPerPageMenuAnchor(null)}
-                    slotProps={{
-                      paper: {
-                        sx: {
-                          bgcolor: 'background.paper',
-                          border: 1,
-                          borderColor: 'divider',
-                          boxShadow: 4,
-                        },
+                  onClick={(event) => setPerPageMenuAnchor(event.currentTarget)}
+                >
+                  {perPage}
+                </AppButton>
+                <Menu
+                  anchorEl={perPageMenuAnchor}
+                  open={Boolean(perPageMenuAnchor)}
+                  onClose={() => setPerPageMenuAnchor(null)}
+                  slotProps={{
+                    paper: {
+                      sx: {
+                        bgcolor: 'background.paper',
+                        border: 1,
+                        borderColor: 'divider',
+                        boxShadow: 4,
                       },
-                      list: {
-                        'aria-labelledby': 'per-page-button',
-                      },
-                    }}
-                  >
-                    {PER_PAGE_OPTIONS.map((option) => (
-                      <MenuItem
-                        key={option}
-                        selected={option === perPage}
-                        onClick={() => {
-                          setPerPage(option)
-                          setPage(1)
-                          setPerPageMenuAnchor(null)
-                        }}
-                      >
-                        {option}
-                      </MenuItem>
-                    ))}
-                  </Menu>
-                </Stack>
+                    },
+                    list: {
+                      'aria-labelledby': 'per-page-button',
+                    },
+                  }}
+                >
+                  {PER_PAGE_OPTIONS.map((option) => (
+                    <MenuItem
+                      key={option}
+                      selected={option === perPage}
+                      onClick={() => {
+                        setPerPage(option)
+                        setPage(1)
+                        setPerPageMenuAnchor(null)
+                      }}
+                    >
+                      {option}
+                    </MenuItem>
+                  ))}
+                </Menu>
               </Stack>
-            )}
+            </Stack>
           </Box>
         </Box>
       )}

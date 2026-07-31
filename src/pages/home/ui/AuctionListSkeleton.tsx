@@ -1,6 +1,5 @@
 import { List, ListItem, Skeleton, Stack } from '@mui/material'
-
-const SKELETON_ITEM_COUNT = 10
+import { SKELETON_ITEM_COUNT } from '../model/constants'
 
 export function AuctionListSkeleton() {
   return (

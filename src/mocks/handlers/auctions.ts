@@ -1,25 +1,14 @@
 import { HttpResponse, delay, http } from 'msw'
 import {
+  AUCTIONS_LIST_PATH,
+  AUCTION_STATUS_IDS,
   auctionListRequestSchema,
+  auctionPath,
   type AuctionListItem,
-  type AuctionStatus,
 } from '@entities/auction'
+import { API_BASE_URL } from '@shared/api/http'
 import { auctionFixtures, findAuctionFixture } from '../fixtures/auctions'
 import { MOCK_DELAY_MS, MOCK_EMPTY, MOCK_ERROR } from '../utils/mockFlags'
-
-const API_BASE = '/api/v1'
-
-const AUCTION_STATUS_IDS: Record<AuctionStatus, number> = {
-  Planning: 1,
-  Auction: 2,
-  DeterminateWinner: 3,
-  WaitDeal: 4,
-  InProgress: 5,
-  Finished: 6,
-  Stopped: 7,
-  Canceled: 8,
-  Unknown: 0,
-}
 
 function matchesFilters(
   item: AuctionListItem,
@@ -96,7 +85,7 @@ function sortItems(
 }
 
 export const auctionHandlers = [
-  http.post(`${API_BASE}/auctions/list`, async ({ request }) => {
+  http.post(`${API_BASE_URL}${AUCTIONS_LIST_PATH}`, async ({ request }) => {
     await delay(MOCK_DELAY_MS)
 
     if (MOCK_ERROR) {
@@ -157,7 +146,7 @@ export const auctionHandlers = [
     })
   }),
 
-  http.get(`${API_BASE}/auctions/:auctionUuid`, ({ params }) => {
+  http.get(`${API_BASE_URL}${auctionPath(':auctionUuid')}`, ({ params }) => {
     const auctionUuid = params.auctionUuid as string
     const fixture = findAuctionFixture(auctionUuid)
 

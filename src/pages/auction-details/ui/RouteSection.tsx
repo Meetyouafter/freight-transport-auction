@@ -4,8 +4,10 @@ import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
 import { Paper, Stack, Typography } from '@mui/material'
 import dayjs from 'dayjs'
-import type { RoutePoint } from '@entities/auction'
+import { OPERATION_TYPE_LABELS, type RoutePoint } from '@entities/auction'
 import { RestrictedField } from '@shared/ui'
+
+const INTERMEDIATE_POINT_LABEL = 'Промежуточная точка'
 
 function formatWindow(start: string, end: string) {
   const from = dayjs(start)
@@ -19,11 +21,9 @@ function formatWindow(start: string, end: string) {
 }
 
 function pointLabel(point: RoutePoint, index: number, total: number) {
-  if (index > 0 && index < total - 1) return 'Промежуточная точка'
-  if (point.op_type === 'Loading') return 'Погрузка'
-  if (point.op_type === 'Unloading') return 'Выгрузка'
+  if (index > 0 && index < total - 1) return INTERMEDIATE_POINT_LABEL
 
-  return 'Точка маршрута'
+  return OPERATION_TYPE_LABELS[point.op_type]
 }
 
 interface RouteSectionProps {

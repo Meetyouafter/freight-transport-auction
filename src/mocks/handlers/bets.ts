@@ -1,12 +1,11 @@
 import { http, HttpResponse } from 'msw'
-import { setBetRequestSchema } from '@entities/bet'
+import { betsPath, setBetRequestSchema } from '@entities/bet'
+import { API_BASE_URL } from '@shared/api/http'
 import { findAuctionFixture } from '../fixtures/auctions'
 import { addBet, getBets } from '../fixtures/bets'
 
-const API_BASE = '/api/v1'
-
 export const betHandlers = [
-  http.get(`${API_BASE}/auctions/:auctionUuid/bets`, ({ params, request }) => {
+  http.get(`${API_BASE_URL}${betsPath(':auctionUuid')}`, ({ params, request }) => {
     const auctionUuid = params.auctionUuid as string
 
     if (!findAuctionFixture(auctionUuid)) {
@@ -21,7 +20,7 @@ export const betHandlers = [
     return HttpResponse.json({ bets: getBets(auctionUuid, includeCancelled) })
   }),
 
-  http.post(`${API_BASE}/auctions/:auctionUuid/bets`, async ({ params, request }) => {
+  http.post(`${API_BASE_URL}${betsPath(':auctionUuid')}`, async ({ params, request }) => {
     const auctionUuid = params.auctionUuid as string
     const fixture = findAuctionFixture(auctionUuid)
 

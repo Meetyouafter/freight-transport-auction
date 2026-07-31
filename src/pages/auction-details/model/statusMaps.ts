@@ -1,33 +1,15 @@
-import type { AuctionShowTrading, AuctionStatus, TradingStatus } from '@entities/auction'
+import {
+  AUCTION_STATUS_LABELS,
+  AUCTION_STATUS_VARIANTS,
+  type AuctionShowTrading,
+  type AuctionStatus,
+  type TradingStatus,
+} from '@entities/auction'
 import type { StatusTokenKey } from '@shared/theme/tokens'
 
 interface StatusLabel {
   variant: StatusTokenKey
   label: string
-}
-
-const AUCTION_STATUS_LABELS: Record<AuctionStatus, string> = {
-  Planning: 'Планирование',
-  Auction: 'Торги идут',
-  DeterminateWinner: 'Определение победителя',
-  WaitDeal: 'Ожидание сделки',
-  InProgress: 'В работе',
-  Finished: 'Завершён',
-  Stopped: 'Остановлен',
-  Canceled: 'Отменён',
-  Unknown: 'Неизвестно',
-}
-
-const AUCTION_STATUS_VARIANTS: Record<AuctionStatus, StatusTokenKey> = {
-  Planning: 'neutral',
-  Auction: 'rising',
-  DeterminateWinner: 'waiting',
-  WaitDeal: 'waiting',
-  InProgress: 'confirmed',
-  Finished: 'confirmed',
-  Stopped: 'rejected',
-  Canceled: 'rejected',
-  Unknown: 'neutral',
 }
 
 /** Бейдж статуса сделки — шапка страницы, `AuctionShowTrading.status`. */

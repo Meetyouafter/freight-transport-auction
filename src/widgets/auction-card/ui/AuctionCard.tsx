@@ -4,12 +4,11 @@ import EastIcon from '@mui/icons-material/East'
 import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import type { AuctionListItem } from '@entities/auction'
+import { TRADING_STATUS_MOBILE_LABELS, type AuctionListItem } from '@entities/auction'
 import { cardTokens, type StatusTokenKey } from '@shared/theme/tokens'
 import { AppButton } from '@shared/ui'
+import { MAX_SECONDARY_BADGES } from '../model/constants'
 import { StatusBadge } from './StatusBadge'
-
-const MAX_SECONDARY_BADGES = 3
 
 function formatDate(date: string) {
   return dayjs(date).format('DD.MM.YYYY')
@@ -25,16 +24,16 @@ function getPrimaryBadge(auction: AuctionListItem): Badge | null {
   const { trading } = auction
 
   if (trading.status_mobile === 'Confirmed') {
-    return { variant: 'confirmed', label: 'Подтверждено' }
+    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Confirmed }
   }
   if (trading.status_mobile === 'Winner') {
-    return { variant: 'confirmed', label: 'Победитель' }
+    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Winner }
   }
   if (trading.status === 'Canceled' || trading.status === 'Stopped') {
     return { variant: 'rejected', label: trading.status === 'Canceled' ? 'Отменён' : 'Остановлен' }
   }
   if (trading.status_mobile === 'Losing') {
-    return { variant: 'rejected', label: 'Проигрываю' }
+    return { variant: 'rejected', label: TRADING_STATUS_MOBILE_LABELS.Losing }
   }
 
   return null

@@ -21,10 +21,10 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker'
 import dayjs from 'dayjs'
 import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
-import type { AuctionTypeFilter, TradingStatus } from '@entities/auction'
 import { CITIES, type City } from '@entities/city'
 import { AppButton } from '@shared/ui'
 import { mapFiltersToRequest } from '../model/mapFiltersToRequest'
+import { AUCTION_STATUS_OPTIONS, AUC_TYPE_OPTIONS, STATUS_OPTIONS } from '../model/options'
 import {
   auctionFiltersFormSchema,
   defaultAuctionFiltersFormValues,
@@ -78,32 +78,6 @@ function renderLimitedTags<T extends { label: string }>(
     </>
   )
 }
-
-const AUC_TYPE_OPTIONS: { value: AuctionTypeFilter; label: string }[] = [
-  { value: 'Request', label: 'Запрос цены' },
-  { value: 'Up', label: 'На повышение' },
-  { value: 'Down', label: 'На понижение' },
-  { value: 'FixPrice', label: 'Фикс. цена' },
-]
-
-const STATUS_OPTIONS: { value: TradingStatus; label: string }[] = [
-  { value: 'NotParticipating', label: 'Не участвую' },
-  { value: 'Leading', label: 'Лидирую' },
-  { value: 'Losing', label: 'Проигрываю' },
-  { value: 'Winner', label: 'Победитель' },
-  { value: 'Confirmed', label: 'Подтверждено' },
-]
-
-const AUCTION_STATUS_OPTIONS: { value: number; label: string }[] = [
-  { value: 1, label: 'Планирование' },
-  { value: 2, label: 'Торги идут' },
-  { value: 3, label: 'Определение победителя' },
-  { value: 4, label: 'Ожидание сделки' },
-  { value: 5, label: 'В работе' },
-  { value: 6, label: 'Завершён' },
-  { value: 7, label: 'Остановлен' },
-  { value: 8, label: 'Отменён' },
-]
 
 interface AuctionFiltersPanelProps {
   values: AuctionFiltersFormValues

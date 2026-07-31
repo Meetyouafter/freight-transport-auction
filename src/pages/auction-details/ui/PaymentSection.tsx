@@ -1,11 +1,5 @@
 import { Paper, Stack, Typography } from '@mui/material'
-import type { AuctionShowResponse } from '@entities/auction'
-
-const DELAY_TYPE_LABELS: Record<string, string> = {
-  CalendarDays: 'календарных дней',
-  WorkDays: 'рабочих дней',
-  Unknown: 'дней',
-}
+import { PAYMENT_DELAY_TYPE_LABELS, type AuctionShowResponse } from '@entities/auction'
 
 interface PaymentSectionProps {
   payment: AuctionShowResponse['payment']
@@ -24,7 +18,8 @@ export function PaymentSection({ payment }: PaymentSectionProps) {
         </Typography>
         {payment.delay != null && (
           <Typography variant="body2" color="text.secondary">
-            Отсрочка платежа: {payment.delay} {DELAY_TYPE_LABELS[payment.delay_type ?? 'Unknown']}
+            Отсрочка платежа: {payment.delay}{' '}
+            {PAYMENT_DELAY_TYPE_LABELS[payment.delay_type ?? 'Unknown']}
           </Typography>
         )}
         {payment.condition && (

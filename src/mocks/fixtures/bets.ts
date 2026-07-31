@@ -1,4 +1,5 @@
 import type { BetItem } from '@entities/bet'
+import { MOCK_VAT_DIVISOR } from '../utils/mockFlags'
 
 /** Auction UUID -> bets placed in that auction, mutated by the `setBet` handler. */
 export const betsByAuction = new Map<string, BetItem[]>([
@@ -83,7 +84,7 @@ export function addBet(auctionUuid: string, auctionId: number, price: number): B
     contact_name: 'Иванов Иван',
     contact_phone: '+79001234567',
     price_with_vat: price,
-    price_no_vat: Math.round((price / 1.22) * 100) / 100,
+    price_no_vat: Math.round((price / MOCK_VAT_DIVISOR) * 100) / 100,
     organization_id: 14,
     organization_inn: '9616244307',
     organization_name: 'ООО Перевозчик',
@@ -96,7 +97,7 @@ export function addBet(auctionUuid: string, auctionId: number, price: number): B
     cancel_reason: '',
     price_info: {
       price_with_vat: price,
-      price_no_vat: Math.round((price / 1.22) * 100) / 100,
+      price_no_vat: Math.round((price / MOCK_VAT_DIVISOR) * 100) / 100,
       payment_type: 'Безналичная с НДС',
       vat_rate: '20',
     },

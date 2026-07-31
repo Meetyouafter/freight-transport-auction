@@ -1,14 +1,7 @@
 import { Chip, Divider, Paper, Stack, Typography } from '@mui/material'
 import type { AuctionShowResponse } from '@entities/auction'
 import { RestrictedField } from '@shared/ui'
-
-const DOC_LABELS: Record<string, string> = { tir: 'TIR', cmr: 'CMR', t1: 'T1', med: 'Мед. книжка' }
-const LOADING_LABELS: Record<string, string> = {
-  side: 'Боковая',
-  top: 'Верхняя',
-  rear: 'Задняя',
-  full: 'Полная',
-}
+import { DOC_LABELS, LOADING_LABELS } from '../model/labels'
 
 interface CargoSectionProps {
   cargo: AuctionShowResponse['cargo']
