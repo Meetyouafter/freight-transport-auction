@@ -1,6 +1,6 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { AuctionShowTrading } from '@entities/auction'
+import { auctionQueryOptions, type AuctionShowTrading } from '@entities/auction'
 import { setBet } from '@entities/bet'
 import { BidForm, type BidFormValues } from '@features/bid-form'
 import { colorTokens } from '@shared/theme/tokens'
@@ -17,7 +17,7 @@ export function TradingSidebar({ auctionUuid, trading }: TradingSidebarProps) {
   const mutation = useMutation({
     mutationFn: (values: BidFormValues) => setBet(auctionUuid, { price: values.price }),
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['auction', auctionUuid] })
+      void queryClient.invalidateQueries({ queryKey: auctionQueryOptions(auctionUuid).queryKey })
       void queryClient.invalidateQueries({ queryKey: ['auctions'] })
     },
   })

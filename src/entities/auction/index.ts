@@ -1,4 +1,4 @@
-export { getAuction } from './api/getAuction'
+export { getAuction, auctionQueryOptions } from './api/getAuction'
 export { listAuctions } from './api/listAuctions'
 export {
   auctionTypeSchema,

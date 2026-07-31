@@ -2,9 +2,14 @@ import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import CalendarTodayIcon from '@mui/icons-material/CalendarTodayOutlined'
 import EastIcon from '@mui/icons-material/East'
 import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
+import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import dayjs from 'dayjs'
-import { TRADING_STATUS_MOBILE_LABELS, type AuctionListItem } from '@entities/auction'
+import {
+  auctionQueryOptions,
+  TRADING_STATUS_MOBILE_LABELS,
+  type AuctionListItem
+} from '@entities/auction'
 import { cardTokens, type StatusTokenKey } from '@shared/theme/tokens'
 import { AppButton } from '@shared/ui'
 import { MAX_SECONDARY_BADGES } from '../model/constants'
@@ -66,6 +71,7 @@ interface AuctionCardProps {
 
 export function AuctionCard({ auction }: AuctionCardProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const { main, route, cargo, trading } = auction
   const hasMyBid = Boolean(trading.your?.bet)
   const canBid = trading.can_set_bet
@@ -76,6 +82,7 @@ export function AuctionCard({ auction }: AuctionCardProps) {
     navigate({ to: '/auctions/$auctionId', params: { auctionId: main.order_uid } })
   const goToBid = () =>
     navigate({ to: '/auctions/$auctionId/bid', params: { auctionId: main.order_uid } })
+  const prefetchDetails = () => queryClient.prefetchQuery(auctionQueryOptions(main.order_uid))
 
   return (
     <Paper
@@ -92,6 +99,8 @@ export function AuctionCard({ auction }: AuctionCardProps) {
         },
       }}
       onClick={goToDetails}
+      onMouseEnter={prefetchDetails}
+      onFocus={prefetchDetails}
     >
       <Stack sx={{ px: { xs: 2, sm: 3 }, pt: 2, pb: 1.5 }} spacing={1.5}>
         <Stack

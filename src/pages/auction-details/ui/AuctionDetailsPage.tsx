@@ -3,7 +3,7 @@ import { Box, Container, Drawer, Skeleton, Stack, Typography } from '@mui/materi
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
-import { getAuction } from '@entities/auction'
+import { auctionQueryOptions } from '@entities/auction'
 import { ErrorState } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 import { dealStatusBadge, participationBadge } from '../model/statusMaps'
@@ -28,10 +28,7 @@ function DetailsSkeleton() {
 export function AuctionDetailsPage() {
   const { auctionId } = useParams({ from: '/auctions/$auctionId/' })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
-  const { data, isPending, isError } = useQuery({
-    queryKey: ['auction', auctionId],
-    queryFn: () => getAuction(auctionId),
-  })
+  const { data, isPending, isError } = useQuery(auctionQueryOptions(auctionId))
 
   if (isError) {
     return (
