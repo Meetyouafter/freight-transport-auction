@@ -1,4 +1,4 @@
-import { http, HttpResponse } from 'msw'
+import { HttpResponse, http } from 'msw'
 import { auctionListRequestSchema, type AuctionListItem } from '@entities/auction'
 import { auctionFixtures, findAuctionFixture } from '../fixtures/auctions'
 

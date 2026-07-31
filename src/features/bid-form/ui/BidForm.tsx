@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button, Stack, TextField } from '@mui/material'
+import { Stack, TextField } from '@mui/material'
 import { useForm } from 'react-hook-form'
+import { AppButton } from '@shared/ui'
 import { bidFormSchema, type BidFormValues } from '../model/schema'
 
 interface BidFormProps {
@@ -26,9 +27,9 @@ export function BidForm({ onSubmit }: BidFormProps) {
         error={Boolean(errors.price)}
         helperText={errors.price?.message}
       />
-      <Button type="submit" variant="contained" disabled={isSubmitting}>
+      <AppButton type="submit" disabled={isSubmitting}>
         Сделать ставку
-      </Button>
+      </AppButton>
     </Stack>
   )
 }

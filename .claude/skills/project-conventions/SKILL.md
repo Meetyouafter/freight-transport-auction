@@ -93,7 +93,11 @@ this stays close to empty, since MUI + the theme should cover styling needs.
   `@hookform/resolvers/zod`. The Zod schema is the single source of truth — infer the TS type from
   it (`z.infer<typeof schema>`), don't hand-write a parallel interface.
 - **Any data from the network** → TanStack Query (`useQuery`/`useMutation`), never `useEffect` +
-  `useState` fetching. Query functions live in `entities/*/api/`.
+  `useState` fetching. Query functions live in `entities/*/api/`. **All API access goes through
+  TanStack Query — no direct `fetch`/`axios` calls from components, pages, or features.** The only
+  place raw `fetch` is allowed is `shared/api/http.ts` (the `apiFetch` wrapper); every query/mutation
+  function calls that wrapper, and every component consumes those functions exclusively via
+  `useQuery`/`useMutation`/`useQueryClient`.
 - **Small, local UI state that isn't server data** (a dialog's open/closed flag, an active tab) →
   a Zustand store in `shared/lib/store/` (see `useUiStore.ts`). Don't reach for Zustand for
   anything that's actually server state — that's Query's job — and don't put it in `entities` or
