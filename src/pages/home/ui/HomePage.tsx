@@ -18,14 +18,15 @@ import {
   mapFiltersToRequest,
   searchToFilters,
 } from '@features/auction-filters'
+import { ROUTES } from '@shared/config/routes'
 import { AppButton, EmptyState, ErrorState } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
 import { AuctionListSkeleton } from './AuctionListSkeleton'
 
 export function HomePage() {
-  const navigate = useNavigate({ from: '/' })
-  const search = useSearch({ from: '/' })
+  const navigate = useNavigate({ from: ROUTES.home })
+  const search = useSearch({ from: ROUTES.home })
   const filterValues = searchToFilters(search)
   const appliedFilters = mapFiltersToRequest(filterValues)
   const [page, setPage] = useState(1)

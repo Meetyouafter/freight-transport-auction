@@ -8,8 +8,9 @@ import dayjs from 'dayjs'
 import {
   auctionQueryOptions,
   TRADING_STATUS_MOBILE_LABELS,
-  type AuctionListItem
+  type AuctionListItem,
 } from '@entities/auction'
+import { ROUTES } from '@shared/config/routes'
 import { cardTokens, type StatusTokenKey } from '@shared/theme/tokens'
 import { AppButton } from '@shared/ui'
 import { MAX_SECONDARY_BADGES } from '../model/constants'
@@ -79,9 +80,8 @@ export function AuctionCard({ auction }: AuctionCardProps) {
   const secondaryBadges = getSecondaryBadges(auction, hasMyBid)
 
   const goToDetails = () =>
-    navigate({ to: '/auctions/$auctionId', params: { auctionId: main.order_uid } })
-  const goToBid = () =>
-    navigate({ to: '/auctions/$auctionId/bid', params: { auctionId: main.order_uid } })
+    navigate({ to: ROUTES.auctionDetails, params: { auctionId: main.order_uid } })
+  const goToBid = () => navigate({ to: ROUTES.auctionBid, params: { auctionId: main.order_uid } })
   const prefetchDetails = () => queryClient.prefetchQuery(auctionQueryOptions(main.order_uid))
 
   return (

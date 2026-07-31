@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
 import { auctionQueryOptions } from '@entities/auction'
+import { ROUTES } from '@shared/config/routes'
 import { ErrorState } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 import { dealStatusBadge, participationBadge } from '../model/statusMaps'
@@ -26,7 +27,7 @@ function DetailsSkeleton() {
 }
 
 export function AuctionDetailsPage() {
-  const { auctionId } = useParams({ from: '/auctions/$auctionId/' })
+  const { auctionId } = useParams({ from: ROUTES.auctionDetailsId })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   const { data, isPending, isError } = useQuery(auctionQueryOptions(auctionId))
 
@@ -55,7 +56,7 @@ export function AuctionDetailsPage() {
       <Stack spacing={1} sx={{ mb: 3 }}>
         <Box>
           <Link
-            to="/"
+            to={ROUTES.home}
             style={{
               display: 'inline-flex',
               alignItems: 'center',

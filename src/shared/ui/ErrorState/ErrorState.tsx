@@ -1,6 +1,7 @@
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import { Box, Stack, Typography } from '@mui/material'
 import { Link } from '@tanstack/react-router'
+import { ROUTES } from '@shared/config/routes'
 import { AppButton } from '../AppButton/AppButton'
 
 interface ErrorStateProps {
@@ -28,7 +29,7 @@ export function ErrorState({
         <ErrorOutlineIcon color="error" fontSize="large" />
         <Typography variant="subtitle1">{title}</Typography>
         <Typography color="text.secondary">{description}</Typography>
-        <AppButton component={Link} to="/" size="large" sx={{ mt: 2 }}>
+        <AppButton component={Link} to={ROUTES.home} size="large" sx={{ mt: 2 }}>
           Вернуться на главную
         </AppButton>
       </Stack>
