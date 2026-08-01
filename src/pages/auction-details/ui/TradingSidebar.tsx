@@ -1,20 +1,24 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { auctionQueryOptions, type AuctionShowTrading } from '@entities/auction'
+import { auctionQueryOptions, type AuctionShowTrading, type AuctionType } from '@entities/auction'
 import { setBet } from '@entities/bet'
 import { BidForm, type BidFormValues } from '@features/bid-form'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { colorTokens } from '@shared/theme/tokens'
+import { StatusBadge } from '@widgets/auction-card'
+import { auctionDirectionBadge } from '../model/statusMaps'
 import { MyBetStatus } from './MyBetStatus'
 
 interface TradingSidebarProps {
   auctionUuid: string
+  aucType: AuctionType
   trading: AuctionShowTrading
 }
 
-export function TradingSidebar({ auctionUuid, trading }: TradingSidebarProps) {
+export function TradingSidebar({ auctionUuid, aucType, trading }: TradingSidebarProps) {
   const queryClient = useQueryClient()
   const { price, can_set_bet: canSetBet } = trading
+  const directionBadge = auctionDirectionBadge(aucType, trading.status)
   const mutation = useMutation({
     mutationFn: (values: BidFormValues) => setBet(auctionUuid, { price: values.price }),
     onSuccess: () => {
@@ -26,9 +30,12 @@ export function TradingSidebar({ auctionUuid, trading }: TradingSidebarProps) {
   return (
     <Stack spacing={2}>
       <Box>
-        <Typography sx={{ fontSize: 24, fontWeight: 500, color: 'text.primary' }}>
-          {formatPrice(price.current)}
-        </Typography>
+        <Stack direction="row" spacing={1} sx={{ alignItems: 'center', flexWrap: 'wrap' }}>
+          <Typography sx={{ fontSize: 24, fontWeight: 500, color: 'text.primary' }}>
+            {formatPrice(price.current)}
+          </Typography>
+          {directionBadge && <StatusBadge tone="outline" {...directionBadge} />}
+        </Stack>
         {price.available != null && (
           <Typography variant="caption" sx={{ color: colorTokens.moss, display: 'block' }}>
             Стартовая цена организатора: {formatPrice(price.available)}

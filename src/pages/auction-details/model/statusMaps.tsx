@@ -1,8 +1,11 @@
+import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
+import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import {
   AUCTION_STATUS_LABELS,
   AUCTION_STATUS_VARIANTS,
   type AuctionShowTrading,
   type AuctionStatus,
+  type AuctionType,
   type TradingStatus,
 } from '@entities/auction'
 import { formatPrice } from '@shared/lib/format/formatPrice'
@@ -33,6 +36,35 @@ export function participationBadge(statusMobile: TradingStatus): StatusLabel | n
   return PARTICIPATION_LABELS[statusMobile] ?? null
 }
 
+interface DirectionBadge extends StatusLabel {
+  icon: React.ReactNode
+}
+
+/** Постоянный индикатор направления торгов рядом с ценой — п.F спецификации. */
+export function auctionDirectionBadge(
+  aucType: AuctionType,
+  status: AuctionStatus,
+): DirectionBadge | null {
+  if (status !== 'Auction') return null
+
+  if (aucType === 'Up') {
+    return {
+      variant: 'rising',
+      label: 'На повышение',
+      icon: <ArrowUpwardIcon sx={{ fontSize: 14 }} />,
+    }
+  }
+  if (aucType === 'Down') {
+    return {
+      variant: 'neutral',
+      label: 'На понижение',
+      icon: <ArrowDownwardIcon sx={{ fontSize: 14 }} />,
+    }
+  }
+
+  return null
+}
+
 interface MyBetStatus extends StatusLabel {
   hint?: string
 }
@@ -60,7 +92,7 @@ export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
   }
   if (status_mobile === 'Leading') {
     return {
-      variant: 'confirmed',
+      variant: 'rising',
       label:
         amount != null ? `Ваша ставка: ${formatPrice(amount)} — лидирует` : 'Ваша ставка лидирует',
     }

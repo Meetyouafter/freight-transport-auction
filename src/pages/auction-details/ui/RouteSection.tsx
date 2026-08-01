@@ -2,7 +2,7 @@ import CalendarTodayIcon from '@mui/icons-material/CalendarTodayOutlined'
 import CallIcon from '@mui/icons-material/CallOutlined'
 import PersonOutlineIcon from '@mui/icons-material/PersonOutlineOutlined'
 import PlaceOutlinedIcon from '@mui/icons-material/PlaceOutlined'
-import { Stack, Typography } from '@mui/material'
+import { Link, Stack, Typography } from '@mui/material'
 import { OPERATION_TYPE_LABELS, type RoutePoint } from '@entities/auction'
 import { formatDateWindow } from '@shared/lib/format/formatDate'
 import { IconText, RestrictedField, SectionCard } from '@shared/ui'
@@ -61,7 +61,9 @@ export function RouteSection({ points, hideAddressAndContacts }: RouteSectionPro
                   )}
                   {point.contact.phone && (
                     <IconText icon={<CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
-                      {point.contact.phone}
+                      <Link href={`tel:${point.contact.phone}`} color="inherit" underline="hover">
+                        {point.contact.phone}
+                      </Link>
                     </IconText>
                   )}
                 </>

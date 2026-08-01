@@ -1,6 +1,6 @@
 import CallIcon from '@mui/icons-material/CallOutlined'
 import EmailOutlinedIcon from '@mui/icons-material/EmailOutlined'
-import { Stack, Typography } from '@mui/material'
+import { Link, Stack, Typography } from '@mui/material'
 import type { AuctionShowResponse, Contact } from '@entities/auction'
 import { IconText, RestrictedField, SectionCard } from '@shared/ui'
 
@@ -28,14 +28,18 @@ export function OrganizerSection({ organizer, contacts, hideContacts }: Organize
                 {contact.name && <Typography variant="body2">{contact.name}</Typography>}
                 {contact.phone && (
                   <IconText icon={<CallIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}>
-                    {contact.phone}
+                    <Link href={`tel:${contact.phone}`} color="inherit" underline="hover">
+                      {contact.phone}
+                    </Link>
                   </IconText>
                 )}
                 {contact.email && (
                   <IconText
                     icon={<EmailOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
                   >
-                    {contact.email}
+                    <Link href={`mailto:${contact.email}`} color="inherit" underline="hover">
+                      {contact.email}
+                    </Link>
                   </IconText>
                 )}
               </Stack>

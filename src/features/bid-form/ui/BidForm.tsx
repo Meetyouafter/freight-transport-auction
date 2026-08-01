@@ -1,7 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Stack, TextField } from '@mui/material'
-import { useMemo } from 'react'
+import {
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  Stack,
+  TextField,
+} from '@mui/material'
+import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { formatPrice } from '@shared/lib/format/formatPrice'
 import { AppButton, RestrictedField } from '@shared/ui'
 import { bidFormSchema, createBidFormSchema, type BidFormValues } from '../model/schema'
 
@@ -37,6 +47,7 @@ export function BidForm({
   disabledReason,
   submitting = false,
 }: BidFormProps) {
+  const [pendingValues, setPendingValues] = useState<BidFormValues | null>(null)
   const hasBounds = min != null || max != null || step != null
   const resolver = useMemo(
     () => zodResolver(hasBounds ? createBidFormSchema({ min, max, step }) : bidFormSchema),
@@ -45,9 +56,10 @@ export function BidForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isValid },
   } = useForm<BidFormValues>({
     resolver,
+    mode: 'onChange',
     defaultValues: { price: defaultPrice },
   })
 
@@ -58,17 +70,48 @@ export function BidForm({
   const boundsCaption = formatBoundsCaption(min, max, step)
 
   return (
-    <Stack component="form" spacing={1} onSubmit={handleSubmit(onSubmit)} noValidate>
-      <TextField
-        label="Ставка, ₽"
-        type="number"
-        {...register('price', { valueAsNumber: true })}
-        error={Boolean(errors.price)}
-        helperText={errors.price?.message ?? boundsCaption}
-      />
-      <AppButton type="submit" disabled={isSubmitting || submitting}>
-        Сделать ставку
-      </AppButton>
-    </Stack>
+    <>
+      <Stack
+        component="form"
+        spacing={1}
+        onSubmit={handleSubmit((values) => setPendingValues(values))}
+        noValidate
+      >
+        <TextField
+          label="Ставка, ₽"
+          type="number"
+          slotProps={{
+            htmlInput: { min: min ?? undefined, max: max ?? undefined, step: step ?? undefined },
+          }}
+          {...register('price', { valueAsNumber: true })}
+          error={Boolean(errors.price)}
+          helperText={errors.price?.message ?? boundsCaption}
+        />
+        <AppButton type="submit" disabled={isSubmitting || submitting || !isValid}>
+          Сделать ставку
+        </AppButton>
+      </Stack>
+
+      <Dialog open={pendingValues != null} onClose={() => setPendingValues(null)}>
+        <DialogTitle>Подтвердите ставку</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Вы собираетесь сделать ставку {pendingValues && formatPrice(pendingValues.price)}.
+            Действие нельзя отменить.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingValues(null)}>Отмена</Button>
+          <AppButton
+            onClick={() => {
+              if (pendingValues) onSubmit(pendingValues)
+              setPendingValues(null)
+            }}
+          >
+            Подтвердить
+          </AppButton>
+        </DialogActions>
+      </Dialog>
+    </>
   )
 }

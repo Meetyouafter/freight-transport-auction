@@ -82,7 +82,8 @@ export function CargoSection({
 
         {showPrice ? (
           <Typography variant="body2" color="text.secondary">
-            Заявленная стоимость груза: {cargo.price} ₽
+            Заявленная стоимость груза:{' '}
+            {cargo.price && cargo.price !== '0' ? `${cargo.price} ₽` : 'не указано'}
           </Typography>
         ) : (
           <RestrictedField reason="Стоимость груза скрыта организатором" />

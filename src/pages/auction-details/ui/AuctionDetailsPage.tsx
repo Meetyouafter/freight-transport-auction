@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { auctionQueryOptions } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
 import { formatPrice } from '@shared/lib/format/formatPrice'
+import { cardTokens } from '@shared/theme/tokens'
 import { ErrorState } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 import { dealStatusBadge, participationBadge } from '../model/statusMaps'
@@ -65,6 +66,11 @@ export function AuctionDetailsPage() {
               gap: 0.5,
               textDecoration: 'none',
               color: 'inherit',
+              borderRadius: 1,
+              px: 0.5,
+              mx: -0.5,
+              transition: 'background-color 150ms ease',
+              '&:hover': { bgcolor: 'rgba(84,83,51,0.08)' },
             }}
           >
             <ArrowBackIcon sx={{ fontSize: 18 }} />
@@ -114,11 +120,11 @@ export function AuctionDetailsPage() {
             border: 1,
             borderColor: 'divider',
             borderRadius: 2,
-            bgcolor: 'background.paper',
+            bgcolor: cardTokens.participatingBg,
             boxShadow: 4,
           }}
         >
-          <TradingSidebar auctionUuid={main.order_uid} trading={trading} />
+          <TradingSidebar auctionUuid={main.order_uid} aucType={main.auc_type} trading={trading} />
         </Box>
       </Stack>
 
@@ -135,11 +141,13 @@ export function AuctionDetailsPage() {
           gap: 2,
           px: 2,
           py: 1.5,
-          bgcolor: 'background.paper',
+          bgcolor: cardTokens.participatingBg,
           borderTop: 1,
           borderColor: 'divider',
           boxShadow: 4,
           cursor: 'pointer',
+          transition: 'background-color 150ms ease',
+          '&:hover': { bgcolor: 'rgba(84,83,51,0.06)' },
         }}
         onClick={() => setMobileSidebarOpen(true)}
       >
@@ -157,9 +165,18 @@ export function AuctionDetailsPage() {
         anchor="bottom"
         open={mobileSidebarOpen}
         onClose={() => setMobileSidebarOpen(false)}
-        slotProps={{ paper: { sx: { borderTopLeftRadius: 16, borderTopRightRadius: 16, p: 3 } } }}
+        slotProps={{
+          paper: {
+            sx: {
+              borderTopLeftRadius: 16,
+              borderTopRightRadius: 16,
+              p: 3,
+              bgcolor: cardTokens.participatingBg,
+            },
+          },
+        }}
       >
-        <TradingSidebar auctionUuid={main.order_uid} trading={trading} />
+        <TradingSidebar auctionUuid={main.order_uid} aucType={main.auc_type} trading={trading} />
       </Drawer>
     </Container>
   )

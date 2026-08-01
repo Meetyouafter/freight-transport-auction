@@ -52,10 +52,8 @@ export function MyBetsPage() {
       {!isPending && isError && <ErrorState />}
 
       {!isPending && !isError && data && (
-        <Box sx={{ position: 'relative', mt: 3 }}>
-          {isRefetching && (
-            <LinearProgress sx={{ position: 'absolute', top: 0, left: 0, right: 0 }} />
-          )}
+        <Box sx={{ mt: 3 }}>
+          {isRefetching && <LinearProgress sx={{ mb: 2 }} />}
 
           <Box
             sx={{
@@ -79,25 +77,27 @@ export function MyBetsPage() {
               </>
             )}
 
-            <Stack
-              direction={{ xs: 'column', sm: 'row' }}
-              spacing={2}
-              sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
-            >
-              <Pagination
-                count={data.meta.last_page}
-                page={page}
-                onChange={(_, value) => setPage(value)}
-                color="primary"
-                disabled={isRefetching}
-              />
-              <PerPageSelect
-                options={PER_PAGE_OPTIONS}
-                value={perPage}
-                onChange={changePerPage}
-                disabled={isRefetching}
-              />
-            </Stack>
+            {data.meta.total >= 10 && (
+              <Stack
+                direction={{ xs: 'column', sm: 'row' }}
+                spacing={2}
+                sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
+              >
+                <Pagination
+                  count={data.meta.last_page}
+                  page={page}
+                  onChange={(_, value) => setPage(value)}
+                  color="primary"
+                  disabled={isRefetching}
+                />
+                <PerPageSelect
+                  options={PER_PAGE_OPTIONS}
+                  value={perPage}
+                  onChange={changePerPage}
+                  disabled={isRefetching}
+                />
+              </Stack>
+            )}
           </Box>
         </Box>
       )}
