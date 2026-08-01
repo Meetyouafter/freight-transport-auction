@@ -12,10 +12,10 @@ import {
   TextField,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { CITIES, type City } from '@entities/city'
 import { AppButton } from '@shared/ui'
+import { useFiltersPanelStore } from '../model/filtersPanelStore'
 import { mapFiltersToRequest } from '../model/mapFiltersToRequest'
 import {
   AUCTION_STATUS_OPTIONS,
@@ -44,7 +44,7 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
     values,
   })
   const submit = handleSubmit(onApply)
-  const [open, setOpen] = useState(false)
+  const { isOpen: open, toggle } = useFiltersPanelStore()
   const hasActiveFilters = Object.values(mapFiltersToRequest(values)).some(
     (value) => value !== undefined,
   )
@@ -60,14 +60,14 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
         <Stack
           direction="row"
           spacing={1}
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={toggle}
           role="button"
           tabIndex={0}
           aria-expanded={open}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               e.preventDefault()
-              setOpen((prev) => !prev)
+              toggle()
             }
           }}
           sx={{

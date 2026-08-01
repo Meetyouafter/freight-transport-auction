@@ -5,6 +5,6 @@
 export const MOCK_DELAY_MS = 1000
 export const MOCK_EMPTY = false
 export const MOCK_ERROR = false
-
-/** VAT divisor used by mock fixtures to derive `price_no_vat` from a VAT-inclusive price. */
+export const MOCK_UNAUTHORIZED = false
+export const MOCK_UNAVAILABLE = false
 export const MOCK_VAT_DIVISOR = 1.22

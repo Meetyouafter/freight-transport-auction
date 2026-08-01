@@ -1,9 +1,11 @@
-import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutlined'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import {
   AUCTION_STATUS_LABELS,
   AUCTION_STATUS_VARIANTS,
+  AUCTION_TYPE_LABELS,
+  AUCTION_TYPE_VARIANTS,
   TRADING_STATUS_MOBILE_LABELS,
   type AuctionListItem,
 } from '@entities/auction'
@@ -44,19 +46,20 @@ export function getPrimaryBadge(auction: AuctionListItem): Badge | null {
 
 export function getSecondaryBadges(auction: AuctionListItem, hasMyBid: boolean): Badge[] {
   const { main, trading } = auction
-  const badges: Badge[] = []
+  const badges: Badge[] = [
+    { variant: AUCTION_TYPE_VARIANTS[main.auc_type], label: AUCTION_TYPE_LABELS[main.auc_type] },
+  ]
 
-  if (main.auc_type === 'Up' && trading.status === 'Auction') {
-    badges.push({
-      variant: 'rising',
-      label: 'На повышение',
-      icon: <ArrowUpwardIcon sx={{ fontSize: 14 }} />,
-    })
-  }
   if (trading.status === 'WaitDeal') {
     badges.push({ variant: 'waiting', label: 'Ожидание сделки' })
   }
-  if (!hasMyBid) {
+  if (hasMyBid) {
+    badges.push({
+      variant: 'confirmed',
+      label: 'Ставка сделана',
+      icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />,
+    })
+  } else {
     badges.push({
       variant: 'neutral',
       label: 'Моей ставки нет',

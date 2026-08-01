@@ -17,7 +17,6 @@ import {
   searchToFilters,
 } from '@features/auction-filters'
 import { ROUTES } from '@shared/config/routes'
-import { usePagination } from '@shared/lib/pagination/usePagination'
 import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
@@ -28,9 +27,8 @@ export function HomePage() {
   const search = useSearch({ from: ROUTES.home })
   const filterValues = searchToFilters(search)
   const appliedFilters = mapFiltersToRequest(filterValues)
-  const { page, perPage, setPage, changePerPage, resetPage } = usePagination<
-    (typeof PER_PAGE_OPTIONS)[number]
-  >({ defaultPerPage: DEFAULT_PAGE_SIZE })
+  const page = search.page ?? 1
+  const perPage = (search.per_page ?? DEFAULT_PAGE_SIZE) as (typeof PER_PAGE_OPTIONS)[number]
   const { data, isPending, isFetching, isError } = useQuery({
     queryKey: ['auctions', page, perPage, appliedFilters],
     queryFn: ({ signal }) => listAuctions({ ...appliedFilters, page, per_page: perPage }, signal),
@@ -66,12 +64,10 @@ export function HomePage() {
       <AuctionFiltersPanel
         values={filterValues}
         onApply={(values) => {
-          navigate({ search: filtersToSearch(values) })
-          resetPage()
+          navigate({ search: { ...filtersToSearch(values), per_page: search.per_page } })
         }}
         onReset={() => {
-          navigate({ search: {} })
-          resetPage()
+          navigate({ search: { per_page: search.per_page } })
         }}
       />
 
@@ -127,14 +123,18 @@ export function HomePage() {
                 <Pagination
                   count={data.meta.last_page}
                   page={page}
-                  onChange={(_, value) => setPage(value)}
+                  onChange={(_, value) =>
+                    navigate({ search: (prev) => ({ ...prev, page: value }) })
+                  }
                   color="primary"
                   disabled={isRefetching}
                 />
                 <PerPageSelect
                   options={PER_PAGE_OPTIONS}
                   value={perPage}
-                  onChange={changePerPage}
+                  onChange={(value) =>
+                    navigate({ search: (prev) => ({ ...prev, per_page: value, page: undefined }) })
+                  }
                   disabled={isRefetching}
                 />
               </Stack>

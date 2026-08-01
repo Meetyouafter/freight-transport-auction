@@ -12,6 +12,7 @@ import { formatPrice } from '@shared/lib/format/formatPrice'
 import { cardTokens } from '@shared/theme/tokens'
 import { AppButton, IconText } from '@shared/ui'
 import { getPrimaryBadge, getSecondaryBadges } from '../model/badges'
+import { getPrimaryAction } from '../model/primaryAction'
 import { StatusBadge } from './StatusBadge'
 
 interface AuctionCardProps {
@@ -23,10 +24,10 @@ export function AuctionCard({ auction }: AuctionCardProps) {
   const queryClient = useQueryClient()
   const { main, route, cargo, trading } = auction
   const hasMyBid = Boolean(trading.your?.bet)
-  const canBid = trading.can_set_bet
   const isFinished = trading.status_mobile === 'Winner'
   const primaryBadge = getPrimaryBadge(auction)
   const secondaryBadges = getSecondaryBadges(auction, hasMyBid)
+  const primaryAction = getPrimaryAction(auction)
 
   const goToDetails = () =>
     navigate({ to: ROUTES.auctionDetails, params: { auctionId: main.order_uid } })
@@ -141,19 +142,19 @@ export function AuctionCard({ auction }: AuctionCardProps) {
         </Box>
 
         <Stack direction="row" spacing={1}>
-          {canBid && (
-            <AppButton
-              size="medium"
-              startIcon={<GavelIcon />}
-              sx={{ minHeight: 40 }}
-              onClick={(e) => {
-                e.stopPropagation()
-                goToBid()
-              }}
-            >
-              Сделать ставку
-            </AppButton>
-          )}
+          <AppButton
+            size="medium"
+            startIcon={<GavelIcon />}
+            sx={{ minHeight: 40 }}
+            disabled={primaryAction.disabled}
+            onClick={(e) => {
+              e.stopPropagation()
+              if (primaryAction.target === 'bid') goToBid()
+              else goToDetails()
+            }}
+          >
+            {primaryAction.label}
+          </AppButton>
           <AppButton
             variant="outlined"
             size="medium"

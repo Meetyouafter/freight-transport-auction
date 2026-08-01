@@ -1,1 +1,1 @@
-export const MAX_SECONDARY_BADGES = 3
+export const MAX_SECONDARY_BADGES = 4

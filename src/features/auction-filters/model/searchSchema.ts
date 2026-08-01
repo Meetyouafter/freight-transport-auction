@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { auctionTypeFilterSchema, tradingStatusSchema } from '@entities/auction'
 import { CITIES } from '@entities/city'
+import { paginationSearchSchema } from '@shared/lib/pagination/paginationSearchSchema'
 import { defaultAuctionFiltersFormValues, type AuctionFiltersFormValues } from './schema'
 
 export const auctionFiltersSearchSchema = z
@@ -21,6 +22,7 @@ export const auctionFiltersSearchSchema = z
     is_bidder: z.boolean().optional().catch(undefined),
     is_available: z.boolean().optional().catch(undefined),
   })
+  .extend(paginationSearchSchema.shape)
   .catch({})
 
 export type AuctionFiltersSearch = z.infer<typeof auctionFiltersSearchSchema>

@@ -1,16 +1,88 @@
-import { Container, Typography } from '@mui/material'
-import { useParams } from '@tanstack/react-router'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { Box, Container, Skeleton, Stack, Typography } from '@mui/material'
+import { useQuery } from '@tanstack/react-query'
+import { useNavigate, useParams } from '@tanstack/react-router'
+import { auctionQueryOptions } from '@entities/auction'
+import { BidForm } from '@features/bid-form'
 import { ROUTES } from '@shared/config/routes'
+import { formatPrice } from '@shared/lib/format/formatPrice'
+import { ErrorState, SectionCard } from '@shared/ui'
 
 export function AuctionBidPage() {
   const { auctionId } = useParams({ from: ROUTES.auctionBid })
+  const navigate = useNavigate()
+  const { data, isPending, isError } = useQuery(auctionQueryOptions(auctionId))
+
+  if (isError) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <ErrorState title="Не удалось загрузить аукцион" />
+      </Container>
+    )
+  }
+
+  if (isPending) {
+    return (
+      <Container maxWidth="sm" sx={{ py: 4 }}>
+        <Skeleton variant="text" width="60%" height={40} />
+        <Skeleton variant="rounded" height={100} sx={{ mt: 2 }} />
+        <Skeleton variant="rounded" height={140} sx={{ mt: 2 }} />
+      </Container>
+    )
+  }
+
+  const { main, trading } = data
+  const { price, can_set_bet: canSetBet } = trading
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Установка ставки
+      <Box sx={{ mb: 2 }}>
+        <Box
+          onClick={() => navigate({ to: ROUTES.auctionDetails, params: { auctionId } })}
+          sx={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 0.5,
+            cursor: 'pointer',
+            color: 'inherit',
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 18 }} />
+          <Typography variant="body2">К аукциону</Typography>
+        </Box>
+      </Box>
+
+      <Typography variant="h5" component="h1" gutterBottom>
+        Ставка по заявке № {main.cargo_num}
       </Typography>
-      <Typography color="text.secondary">Маршрут: /auctions/{auctionId}/bid</Typography>
+
+      <SectionCard title="Параметры торгов">
+        <Stack spacing={0.5}>
+          <Typography sx={{ fontSize: 28, fontWeight: 500 }}>
+            {formatPrice(price.current)}
+          </Typography>
+          {price.available != null && (
+            <Typography variant="body2" color="text.secondary">
+              Доступная цена: {formatPrice(price.available)}
+            </Typography>
+          )}
+        </Stack>
+      </SectionCard>
+
+      <Box sx={{ mt: 3 }}>
+        <BidForm
+          auctionUuid={main.order_uid}
+          min={price.min}
+          max={price.max}
+          step={price.step}
+          defaultPrice={
+            trading.your.last_bet_with_vat ?? trading.your.last_bet ?? price.current ?? 0
+          }
+          disabled={!canSetBet}
+          disabledReason={!canSetBet ? 'Ставки по этому аукциону недоступны' : undefined}
+          onSuccess={() => navigate({ to: ROUTES.auctionDetails, params: { auctionId } })}
+        />
+      </Box>
     </Container>
   )
 }

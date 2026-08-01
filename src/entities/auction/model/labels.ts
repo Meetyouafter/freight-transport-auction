@@ -1,5 +1,29 @@
 import type { StatusTokenKey } from '@shared/theme/tokens'
-import type { AuctionStatus, OperationType, PaymentDelayType, TradingStatus } from './enums'
+import type {
+  AuctionStatus,
+  AuctionType,
+  OperationType,
+  PaymentDelayType,
+  TradingStatus,
+} from './enums'
+
+/** Canonical `AuctionType` → display label, shown as a badge on the auction card. */
+export const AUCTION_TYPE_LABELS: Record<AuctionType, string> = {
+  Request: 'Запрос цены',
+  Up: 'На повышение',
+  Down: 'На понижение',
+  FixPrice: 'Фиксированная цена',
+  Unknown: 'Неизвестно',
+}
+
+/** Canonical `AuctionType` → status-badge color variant. */
+export const AUCTION_TYPE_VARIANTS: Record<AuctionType, StatusTokenKey> = {
+  Request: 'neutral',
+  Up: 'rising',
+  Down: 'waiting',
+  FixPrice: 'confirmed',
+  Unknown: 'neutral',
+}
 
 /** Canonical `AuctionStatus` → display label, shared by pages, widgets and filters. */
 export const AUCTION_STATUS_LABELS: Record<AuctionStatus, string> = {

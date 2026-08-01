@@ -1,8 +1,6 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { auctionQueryOptions, type AuctionShowTrading, type AuctionType } from '@entities/auction'
-import { setBet } from '@entities/bet'
-import { BidForm, type BidFormValues } from '@features/bid-form'
+import type { AuctionShowTrading, AuctionType } from '@entities/auction'
+import { BidForm } from '@features/bid-form'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { colorTokens } from '@shared/theme/tokens'
 import { StatusBadge } from '@widgets/auction-card'
@@ -13,19 +11,17 @@ interface TradingSidebarProps {
   auctionUuid: string
   aucType: AuctionType
   trading: AuctionShowTrading
+  onBidSuccess?: () => void
 }
 
-export function TradingSidebar({ auctionUuid, aucType, trading }: TradingSidebarProps) {
-  const queryClient = useQueryClient()
+export function TradingSidebar({
+  auctionUuid,
+  aucType,
+  trading,
+  onBidSuccess,
+}: TradingSidebarProps) {
   const { price, can_set_bet: canSetBet } = trading
   const directionBadge = auctionDirectionBadge(aucType, trading.status)
-  const mutation = useMutation({
-    mutationFn: (values: BidFormValues) => setBet(auctionUuid, { price: values.price }),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: auctionQueryOptions(auctionUuid).queryKey })
-      void queryClient.invalidateQueries({ queryKey: ['auctions'] })
-    },
-  })
 
   return (
     <Stack spacing={2}>
@@ -50,21 +46,15 @@ export function TradingSidebar({ auctionUuid, aucType, trading }: TradingSidebar
       <Divider />
 
       <BidForm
+        auctionUuid={auctionUuid}
         min={price.min}
         max={price.max}
         step={price.step}
         defaultPrice={trading.your.last_bet_with_vat ?? trading.your.last_bet ?? price.current ?? 0}
         disabled={!canSetBet}
         disabledReason={dealDisabledReason(trading)}
-        submitting={mutation.isPending}
-        onSubmit={(values) => mutation.mutate(values)}
+        onSuccess={onBidSuccess}
       />
-
-      {mutation.isError && (
-        <Typography variant="caption" color="error">
-          Не удалось сделать ставку. Попробуйте ещё раз.
-        </Typography>
-      )}
     </Stack>
   )
 }

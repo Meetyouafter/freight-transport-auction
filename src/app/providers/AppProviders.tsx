@@ -9,6 +9,7 @@ import 'dayjs/locale/ru'
 import type { PropsWithChildren } from 'react'
 import { queryClient } from '@shared/api/query-client'
 import { theme } from '@shared/theme'
+import { ToastProvider } from '@shared/ui'
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -20,8 +21,10 @@ export function AppProviders({ children }: PropsWithChildren) {
           localeText={ruRU.components.MuiLocalizationProvider.defaultProps.localeText}
         >
           <CssBaseline />
-          {children}
-          <ReactQueryDevtools initialIsOpen={false} />
+          <ToastProvider>
+            {children}
+            <ReactQueryDevtools initialIsOpen={false} />
+          </ToastProvider>
         </LocalizationProvider>
       </ThemeProvider>
     </QueryClientProvider>

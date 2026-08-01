@@ -1,19 +1,19 @@
 import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Container, LinearProgress, Pagination, Stack, Typography } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate, useSearch } from '@tanstack/react-router'
 import { listAuctions } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
-import { usePagination } from '@shared/lib/pagination/usePagination'
 import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
 import { MyBetsListSkeleton } from './MyBetsListSkeleton'
 
 export function MyBetsPage() {
-  const { page, perPage, setPage, changePerPage } = usePagination<
-    (typeof PER_PAGE_OPTIONS)[number]
-  >({ defaultPerPage: DEFAULT_PAGE_SIZE })
+  const navigate = useNavigate({ from: ROUTES.myBets })
+  const search = useSearch({ from: ROUTES.myBetsId })
+  const page = search.page ?? 1
+  const perPage = (search.per_page ?? DEFAULT_PAGE_SIZE) as (typeof PER_PAGE_OPTIONS)[number]
   const { data, isPending, isFetching, isError } = useQuery({
     queryKey: ['auctions', 'my-bets', page, perPage],
     queryFn: ({ signal }) => listAuctions({ is_bidder: true, page, per_page: perPage }, signal),
@@ -86,14 +86,18 @@ export function MyBetsPage() {
                 <Pagination
                   count={data.meta.last_page}
                   page={page}
-                  onChange={(_, value) => setPage(value)}
+                  onChange={(_, value) =>
+                    navigate({ search: (prev) => ({ ...prev, page: value }) })
+                  }
                   color="primary"
                   disabled={isRefetching}
                 />
                 <PerPageSelect
                   options={PER_PAGE_OPTIONS}
                   value={perPage}
-                  onChange={changePerPage}
+                  onChange={(value) =>
+                    navigate({ search: (prev) => ({ ...prev, per_page: value, page: undefined }) })
+                  }
                   disabled={isRefetching}
                 />
               </Stack>

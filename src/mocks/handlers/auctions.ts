@@ -8,7 +8,14 @@ import {
 } from '@entities/auction'
 import { API_BASE_URL } from '@shared/api/http'
 import { auctionFixtures, findAuctionFixture } from '../fixtures/auctions'
-import { MOCK_DELAY_MS, MOCK_EMPTY, MOCK_ERROR } from '../utils/mockFlags'
+import {
+  MOCK_DELAY_MS,
+  MOCK_EMPTY,
+  MOCK_ERROR,
+  MOCK_UNAUTHORIZED,
+  MOCK_UNAVAILABLE,
+} from '../utils/mockFlags'
+import { serviceUnavailableResponse, unauthorizedResponse } from '../utils/problemResponses'
 
 function matchesFilters(
   item: AuctionListItem,
@@ -88,6 +95,9 @@ export const auctionHandlers = [
   http.post(`${API_BASE_URL}${AUCTIONS_LIST_PATH}`, async ({ request }) => {
     await delay(MOCK_DELAY_MS)
 
+    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
+    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
+
     if (MOCK_ERROR) {
       return HttpResponse.json(
         {
@@ -147,6 +157,9 @@ export const auctionHandlers = [
   }),
 
   http.get(`${API_BASE_URL}${auctionPath(':auctionUuid')}`, ({ params }) => {
+    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
+    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
+
     const auctionUuid = params.auctionUuid as string
     const fixture = findAuctionFixture(auctionUuid)
 

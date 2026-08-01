@@ -9,21 +9,25 @@ import {
   Stack,
   TextField,
 } from '@mui/material'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { auctionQueryOptions } from '@entities/auction'
+import { setBet } from '@entities/bet'
+import { ApiError } from '@shared/api/http'
 import { formatPrice } from '@shared/lib/format/formatPrice'
-import { AppButton, RestrictedField } from '@shared/ui'
+import { AppButton, RestrictedField, useToast } from '@shared/ui'
 import { bidFormSchema, createBidFormSchema, type BidFormValues } from '../model/schema'
 
 interface BidFormProps {
-  onSubmit: (values: BidFormValues) => void
+  auctionUuid: string
   min?: number | null
   max?: number | null
   step?: number | null
   defaultPrice?: number
   disabled?: boolean
   disabledReason?: string
-  submitting?: boolean
+  onSuccess?: () => void
 }
 
 function formatBoundsCaption(min?: number | null, max?: number | null, step?: number | null) {
@@ -38,15 +42,17 @@ function formatBoundsCaption(min?: number | null, max?: number | null, step?: nu
 }
 
 export function BidForm({
-  onSubmit,
+  auctionUuid,
   min = null,
   max = null,
   step = null,
   defaultPrice = 0,
   disabled = false,
   disabledReason,
-  submitting = false,
+  onSuccess,
 }: BidFormProps) {
+  const queryClient = useQueryClient()
+  const { showSuccess, showError } = useToast()
   const [pendingValues, setPendingValues] = useState<BidFormValues | null>(null)
   const hasBounds = min != null || max != null || step != null
   const resolver = useMemo(
@@ -56,11 +62,39 @@ export function BidForm({
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting, isValid },
   } = useForm<BidFormValues>({
     resolver,
     mode: 'onChange',
     defaultValues: { price: defaultPrice },
+  })
+
+  const mutation = useMutation({
+    mutationFn: (values: BidFormValues) => setBet(auctionUuid, { price: values.price }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: auctionQueryOptions(auctionUuid).queryKey })
+      void queryClient.invalidateQueries({ queryKey: ['auctions'] })
+      showSuccess('Ставка успешно принята')
+      onSuccess?.()
+    },
+    onError: (error) => {
+      if (error instanceof ApiError && error.errors?.length) {
+        for (const fieldError of error.errors) {
+          if (fieldError.field === 'price' || !fieldError.field) {
+            setError('price', { message: fieldError.message })
+          }
+        }
+        showError(error.errors[0].message)
+        return
+      }
+
+      showError(
+        error instanceof ApiError
+          ? error.message
+          : 'Не удалось сделать ставку. Попробуйте ещё раз.',
+      )
+    },
   })
 
   if (disabled) {
@@ -87,7 +121,7 @@ export function BidForm({
           error={Boolean(errors.price)}
           helperText={errors.price?.message ?? boundsCaption}
         />
-        <AppButton type="submit" disabled={isSubmitting || submitting || !isValid}>
+        <AppButton type="submit" disabled={isSubmitting || mutation.isPending || !isValid}>
           Сделать ставку
         </AppButton>
       </Stack>
@@ -104,7 +138,7 @@ export function BidForm({
           <Button onClick={() => setPendingValues(null)}>Отмена</Button>
           <AppButton
             onClick={() => {
-              if (pendingValues) onSubmit(pendingValues)
+              if (pendingValues) mutation.mutate(pendingValues)
               setPendingValues(null)
             }}
           >

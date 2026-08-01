@@ -176,7 +176,12 @@ export function AuctionDetailsPage() {
           },
         }}
       >
-        <TradingSidebar auctionUuid={main.order_uid} aucType={main.auc_type} trading={trading} />
+        <TradingSidebar
+          auctionUuid={main.order_uid}
+          aucType={main.auc_type}
+          trading={trading}
+          onBidSuccess={() => setMobileSidebarOpen(false)}
+        />
       </Drawer>
     </Container>
   )
