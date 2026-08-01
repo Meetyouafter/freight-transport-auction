@@ -30,6 +30,12 @@ export const STATUS_OPTIONS = TRADING_STATUS_FILTER_VALUES.map((value) => ({
   label: TRADING_STATUS_MOBILE_LABELS[value],
 }))
 
+const BODY_TYPE_VALUES = ['тентованный', 'фургон', 'бортовой'] as const
+
+export const BODY_TYPE_OPTIONS: { value: string; label: string }[] = BODY_TYPE_VALUES.map(
+  (value) => ({ value, label: value }),
+)
+
 export const AUCTION_STATUS_OPTIONS = (
   Object.entries(AUCTION_STATUS_IDS) as [AuctionStatus, number][]
 )

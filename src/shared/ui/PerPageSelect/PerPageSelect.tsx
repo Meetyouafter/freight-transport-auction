@@ -27,6 +27,7 @@ export function PerPageSelect<T extends number>({
         id="per-page-button"
         size="small"
         disabled={disabled}
+        aria-label="Количество элементов на странице"
         onClick={(event) => setAnchorEl(event.currentTarget)}
       >
         {value}

@@ -26,6 +26,7 @@ export const paletteTokens = {
     primary: '#2a2a1c',
     secondary: colorTokens.olive,
   },
+  divider: colorTokens.moss,
 } as const
 
 export const shapeTokens = {
@@ -43,6 +44,7 @@ export type StatusTokenKey = keyof typeof statusTokens
 
 export const cardTokens = {
   participatingBg: '#F2EFC4',
+  finishedBg: statusTokens.neutral.tint,
 } as const
 
 export const spacingTokenBaseUnit = 8

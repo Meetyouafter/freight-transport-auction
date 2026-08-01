@@ -1,4 +1,12 @@
-import { Box, Container, LinearProgress, Pagination, Stack, Typography } from '@mui/material'
+import {
+  Box,
+  Container,
+  Divider,
+  LinearProgress,
+  Pagination,
+  Stack,
+  Typography,
+} from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { useNavigate, useSearch } from '@tanstack/react-router'
 import { listAuctions } from '@entities/auction'
@@ -48,6 +56,8 @@ export function HomePage() {
         }}
       />
 
+      <Divider sx={{ mt: 3 }} />
+
       {isPending && (
         <Box sx={{ mt: 3 }}>
           <AuctionListSkeleton />
@@ -79,11 +89,16 @@ export function HomePage() {
             )}
 
             {data.data.length > 0 && (
-              <Stack spacing={2}>
-                {data.data.map((auction) => (
-                  <AuctionCard key={auction.main.order_uid} auction={auction} />
-                ))}
-              </Stack>
+              <>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Показано {data.meta.from}–{data.meta.to} из {data.meta.total} заявок
+                </Typography>
+                <Stack spacing={2}>
+                  {data.data.map((auction) => (
+                    <AuctionCard key={auction.main.order_uid} auction={auction} />
+                  ))}
+                </Stack>
+              </>
             )}
 
             <Stack

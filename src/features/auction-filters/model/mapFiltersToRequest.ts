@@ -8,6 +8,7 @@ export function mapFiltersToRequest(values: AuctionFiltersFormValues): AuctionLi
     auc_type: values.auc_type.length ? values.auc_type : undefined,
     status: values.status.length ? values.status : undefined,
     statuses: values.statuses.length ? values.statuses : undefined,
+    body_types: values.body_types.length ? values.body_types : undefined,
     load_city: values.load_city?.name || undefined,
     load_gc_id: values.load_city?.gcId ?? undefined,
     unload_city: values.unload_city?.name || undefined,

@@ -1,5 +1,7 @@
 import CalendarTodayIcon from '@mui/icons-material/CalendarTodayOutlined'
 import EastIcon from '@mui/icons-material/East'
+import GavelIcon from '@mui/icons-material/Gavel'
+import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined'
 import { Box, Divider, Paper, Stack, Typography } from '@mui/material'
 import { useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -22,6 +24,7 @@ export function AuctionCard({ auction }: AuctionCardProps) {
   const { main, route, cargo, trading } = auction
   const hasMyBid = Boolean(trading.your?.bet)
   const canBid = trading.can_set_bet
+  const isFinished = trading.status_mobile === 'Winner'
   const primaryBadge = getPrimaryBadge(auction)
   const secondaryBadges = getSecondaryBadges(auction, hasMyBid)
 
@@ -35,13 +38,22 @@ export function AuctionCard({ auction }: AuctionCardProps) {
       variant="outlined"
       sx={{
         borderRadius: '12px',
-        bgcolor: hasMyBid ? cardTokens.participatingBg : 'transparent',
-        boxShadow: 4,
+        bgcolor: isFinished
+          ? cardTokens.finishedBg
+          : hasMyBid
+            ? cardTokens.participatingBg
+            : 'transparent',
+        boxShadow: isFinished ? 1 : 4,
         cursor: 'pointer',
-        transition: 'background-color 0.15s ease, border-color 0.15s ease',
+        transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
         '&:hover': {
-          bgcolor: hasMyBid ? cardTokens.participatingBg : 'action.hover',
+          bgcolor: isFinished
+            ? cardTokens.finishedBg
+            : hasMyBid
+              ? cardTokens.participatingBg
+              : 'action.hover',
           borderColor: 'primary.main',
+          boxShadow: isFinished ? 2 : 4,
         },
       }}
       onClick={goToDetails}
@@ -94,9 +106,11 @@ export function AuctionCard({ auction }: AuctionCardProps) {
           </IconText>
         </Stack>
 
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+        <IconText
+          icon={<LocalShippingOutlinedIcon sx={{ fontSize: 14, color: 'text.disabled' }} />}
+        >
           {cargo.name} · {cargo.weight} т · {cargo.volume} м³ · {cargo.body_type}
-        </Typography>
+        </IconText>
       </Stack>
 
       <Divider />
@@ -117,7 +131,10 @@ export function AuctionCard({ auction }: AuctionCardProps) {
             {formatPrice(trading.price?.current)}
           </Typography>
           {main.price_per_km != null && (
-            <Typography variant="caption" sx={{ color: 'text.disabled', display: 'block' }}>
+            <Typography
+              variant="body2"
+              sx={{ color: 'primary.dark', fontWeight: 700, display: 'block' }}
+            >
               {main.price_per_km} ₽/км
             </Typography>
           )}
@@ -127,6 +144,7 @@ export function AuctionCard({ auction }: AuctionCardProps) {
           {canBid && (
             <AppButton
               size="medium"
+              startIcon={<GavelIcon />}
               sx={{ minHeight: 40 }}
               onClick={(e) => {
                 e.stopPropagation()

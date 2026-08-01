@@ -1,4 +1,6 @@
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutlineOutlined'
 import {
   AUCTION_STATUS_LABELS,
   AUCTION_STATUS_VARIANTS,
@@ -21,7 +23,11 @@ export function getPrimaryBadge(auction: AuctionListItem): Badge | null {
     return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Confirmed }
   }
   if (trading.status_mobile === 'Winner') {
-    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Winner }
+    return {
+      variant: 'confirmed',
+      label: TRADING_STATUS_MOBILE_LABELS.Winner,
+      icon: <EmojiEventsIcon sx={{ fontSize: 14 }} />,
+    }
   }
   if (trading.status === 'Canceled' || trading.status === 'Stopped') {
     return {
@@ -51,7 +57,11 @@ export function getSecondaryBadges(auction: AuctionListItem, hasMyBid: boolean):
     badges.push({ variant: 'waiting', label: 'Ожидание сделки' })
   }
   if (!hasMyBid) {
-    badges.push({ variant: 'neutral', label: 'Моей ставки нет' })
+    badges.push({
+      variant: 'neutral',
+      label: 'Моей ставки нет',
+      icon: <RemoveCircleOutlineIcon sx={{ fontSize: 14 }} />,
+    })
   }
 
   return badges.slice(0, MAX_SECONDARY_BADGES)

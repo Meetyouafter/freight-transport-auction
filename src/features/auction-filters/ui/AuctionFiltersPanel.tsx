@@ -17,7 +17,12 @@ import { Controller, useForm } from 'react-hook-form'
 import { CITIES, type City } from '@entities/city'
 import { AppButton } from '@shared/ui'
 import { mapFiltersToRequest } from '../model/mapFiltersToRequest'
-import { AUCTION_STATUS_OPTIONS, AUC_TYPE_OPTIONS, STATUS_OPTIONS } from '../model/options'
+import {
+  AUCTION_STATUS_OPTIONS,
+  AUC_TYPE_OPTIONS,
+  BODY_TYPE_OPTIONS,
+  STATUS_OPTIONS,
+} from '../model/options'
 import {
   auctionFiltersFormSchema,
   defaultAuctionFiltersFormValues,
@@ -159,6 +164,21 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
                     value={AUCTION_STATUS_OPTIONS.filter((option) =>
                       field.value.includes(option.value),
                     )}
+                    onChange={(selected) => {
+                      field.onChange(selected.map((option) => option.value))
+                      void submit()
+                    }}
+                  />
+                )}
+              />
+              <Controller
+                name="body_types"
+                control={control}
+                render={({ field }) => (
+                  <MultiSelectFilterField
+                    label="Тип кузова"
+                    options={BODY_TYPE_OPTIONS}
+                    value={BODY_TYPE_OPTIONS.filter((option) => field.value.includes(option.value))}
                     onChange={(selected) => {
                       field.onChange(selected.map((option) => option.value))
                       void submit()
