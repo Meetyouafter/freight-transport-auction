@@ -4,6 +4,7 @@ import { listBets } from '@entities/bet'
 import { formatDateTime } from '@shared/lib/format/formatDate'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { EmptyState, RestrictedField, SectionCard } from '@shared/ui'
+import { StatusBadge } from '@widgets/auction-card'
 
 interface BetsHistorySectionProps {
   auctionUuid: string
@@ -12,13 +13,16 @@ interface BetsHistorySectionProps {
 
 export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionProps) {
   const { data, isPending, isError } = useQuery({
-    queryKey: ['auction', auctionUuid, 'bets'],
-    queryFn: () => listBets(auctionUuid),
+    queryKey: ['auction', auctionUuid, 'bets', 'all'],
+    queryFn: () => listBets(auctionUuid, true),
     enabled: !hidden,
   })
 
+  const bets = data?.bets ?? []
+  const participantsCount = new Set(bets.map((bet) => bet.organization_id)).size
+
   return (
-    <SectionCard title="История ставок">
+    <SectionCard title="Ставки">
       {hidden && <RestrictedField reason="История ставок скрыта организатором" />}
 
       {!hidden && isPending && (
@@ -30,33 +34,74 @@ export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionPr
 
       {!hidden && isError && (
         <Typography variant="body2" color="error">
-          Не удалось загрузить историю ставок
+          Не удалось загрузить ставки
         </Typography>
       )}
 
       {!hidden &&
         !isPending &&
         !isError &&
-        (data.bets.length === 0 ? (
+        (bets.length === 0 ? (
           <EmptyState text="Ставок пока нет" />
         ) : (
-          <List disablePadding>
-            {data.bets.map((bet) => (
-              <ListItem
-                key={bet.id}
-                disableGutters
-                divider
-                sx={{ display: 'flex', justifyContent: 'space-between' }}
-              >
-                <Typography variant="body2" color="text.secondary">
-                  {formatDateTime(bet.created_at)}
-                </Typography>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  {formatPrice(bet.price_with_vat)}
-                </Typography>
-              </ListItem>
-            ))}
-          </List>
+          <Stack spacing={1.5}>
+            <Typography variant="body2" color="text.secondary">
+              Участников: {participantsCount}
+            </Typography>
+
+            <List disablePadding>
+              {bets.map((bet) => (
+                <ListItem key={bet.id} disableGutters divider sx={{ display: 'block', py: 1.5 }}>
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}
+                  >
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                      {bet.place != null && (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          #{bet.place}
+                        </Typography>
+                      )}
+                      <Typography variant="body2" color="text.secondary">
+                        {formatDateTime(bet.created_at)}
+                      </Typography>
+                    </Stack>
+
+                    <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
+                      {bet.is_win && <StatusBadge variant="confirmed" label="Победитель" />}
+                      {bet.is_rejected && <StatusBadge variant="rejected" label="Отменена" />}
+                    </Stack>
+                  </Stack>
+
+                  <Stack
+                    direction="row"
+                    spacing={1}
+                    sx={{ alignItems: 'flex-start', justifyContent: 'space-between', mt: 0.5 }}
+                  >
+                    <Typography variant="body2">
+                      {bet.organization_name || 'Перевозчик не указан'}
+                    </Typography>
+
+                    <Stack sx={{ alignItems: 'flex-end' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                        {formatPrice(bet.price_with_vat)} с НДС
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {formatPrice(bet.price_no_vat)} без НДС
+                      </Typography>
+                    </Stack>
+                  </Stack>
+
+                  {bet.is_rejected && bet.cancel_reason && (
+                    <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>
+                      Причина отмены: {bet.cancel_reason}
+                    </Typography>
+                  )}
+                </ListItem>
+              ))}
+            </List>
+          </Stack>
         ))}
     </SectionCard>
   )

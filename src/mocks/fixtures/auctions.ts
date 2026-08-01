@@ -156,7 +156,7 @@ export const auctionFixtures: AuctionFixture[] = [
         bid_measurement_type: 'PerRoute',
         can_set_bet: true,
         allow_counter_bets: true,
-        hide_bets_history: false,
+        hide_bets_history: true,
         hide_places: true,
         no_view_cargo_price: false,
         hide_points_address_and_contacts: true,

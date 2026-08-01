@@ -1,85 +1,52 @@
-import {
-  Box,
-  Container,
-  Divider,
-  LinearProgress,
-  Pagination,
-  Stack,
-  Typography,
-} from '@mui/material'
+import ArrowBackIcon from '@mui/icons-material/ArrowBack'
+import { Box, Container, LinearProgress, Pagination, Stack, Typography } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Link, useNavigate, useSearch } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { listAuctions } from '@entities/auction'
-import {
-  AuctionFiltersPanel,
-  filtersToSearch,
-  mapFiltersToRequest,
-  searchToFilters,
-} from '@features/auction-filters'
 import { ROUTES } from '@shared/config/routes'
 import { usePagination } from '@shared/lib/pagination/usePagination'
 import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
-import { AuctionListSkeleton } from './AuctionListSkeleton'
+import { MyBetsListSkeleton } from './MyBetsListSkeleton'
 
-export function HomePage() {
-  const navigate = useNavigate({ from: ROUTES.home })
-  const search = useSearch({ from: ROUTES.home })
-  const filterValues = searchToFilters(search)
-  const appliedFilters = mapFiltersToRequest(filterValues)
-  const { page, perPage, setPage, changePerPage, resetPage } = usePagination<
+export function MyBetsPage() {
+  const { page, perPage, setPage, changePerPage } = usePagination<
     (typeof PER_PAGE_OPTIONS)[number]
   >({ defaultPerPage: DEFAULT_PAGE_SIZE })
   const { data, isPending, isFetching, isError } = useQuery({
-    queryKey: ['auctions', page, perPage, appliedFilters],
-    queryFn: ({ signal }) => listAuctions({ ...appliedFilters, page, per_page: perPage }, signal),
+    queryKey: ['auctions', 'my-bets', page, perPage],
+    queryFn: ({ signal }) => listAuctions({ is_bidder: true, page, per_page: perPage }, signal),
     placeholderData: keepPreviousData,
   })
   const isRefetching = isFetching && !isPending
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
-      <Stack direction="row" sx={{ justifyContent: 'flex-end', mb: 1 }}>
+      <Box sx={{ mb: 2 }}>
         <Box
           component={Link}
-          to={ROUTES.myBets}
+          to={ROUTES.home}
           sx={{
             display: 'inline-flex',
             alignItems: 'center',
             gap: 0.5,
             textDecoration: 'none',
-            color: 'primary.main',
-            fontWeight: 600,
+            color: 'inherit',
           }}
         >
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Мои ставки
-          </Typography>
+          <ArrowBackIcon sx={{ fontSize: 18 }} />
+          <Typography variant="body2">К списку аукционов</Typography>
         </Box>
-      </Stack>
+      </Box>
 
       <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
-        Активные аукционы
+        Мои ставки
       </Typography>
-
-      <AuctionFiltersPanel
-        values={filterValues}
-        onApply={(values) => {
-          navigate({ search: filtersToSearch(values) })
-          resetPage()
-        }}
-        onReset={() => {
-          navigate({ search: {} })
-          resetPage()
-        }}
-      />
-
-      <Divider sx={{ mt: 3 }} />
 
       {isPending && (
         <Box sx={{ mt: 3 }}>
-          <AuctionListSkeleton />
+          <MyBetsListSkeleton />
         </Box>
       )}
       {!isPending && isError && <ErrorState />}
@@ -97,15 +64,7 @@ export function HomePage() {
               transition: 'opacity 0.15s ease',
             }}
           >
-            {data.data.length === 0 && (
-              <EmptyState
-                text={
-                  Object.values(appliedFilters).some((value) => value !== undefined)
-                    ? 'На текущий момент нет открытых аукционов, соответствующих выбранным фильтрам'
-                    : 'На текущий момент нет открытых аукционов'
-                }
-              />
-            )}
+            {data.data.length === 0 && <EmptyState text="Вы пока не участвовали в аукционах" />}
 
             {data.data.length > 0 && (
               <>
