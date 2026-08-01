@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { AuctionType } from '@entities/auction'
 
 export const bidFormSchema = z.object({
   price: z.number().positive('Ставка должна быть больше 0'),
@@ -10,10 +11,11 @@ interface BidBounds {
   min: number | null
   max: number | null
   step: number | null
+  current?: number | null
+  aucType?: AuctionType
 }
 
-/** Builds a validation schema against the auction's own min/max/step trading bounds. */
-export function createBidFormSchema({ min, max, step }: BidBounds) {
+export function createBidFormSchema({ min, max, step, current = null, aucType }: BidBounds) {
   return z
     .object({
       price: z.number().positive('Ставка должна быть больше 0'),
@@ -36,4 +38,12 @@ export function createBidFormSchema({ min, max, step }: BidBounds) {
       },
       { message: step ? `Ставка должна быть кратна шагу ${step} ₽` : undefined, path: ['price'] },
     )
+    .refine((values) => aucType !== 'Up' || current == null || values.price > current, {
+      message: current != null ? `Ставка должна быть выше текущей цены ${current} ₽` : undefined,
+      path: ['price'],
+    })
+    .refine((values) => aucType !== 'Down' || current == null || values.price < current, {
+      message: current != null ? `Ставка должна быть ниже текущей цены ${current} ₽` : undefined,
+      path: ['price'],
+    })
 }

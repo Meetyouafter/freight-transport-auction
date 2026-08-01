@@ -70,8 +70,14 @@ export const betHandlers = [
     }
 
     const { price } = parsed.data
-    const { min, max, step } = fixture.show.trading.price
-    const boundsError = validateBounds(price, { min, max, step })
+    const { min, max, step, current } = fixture.show.trading.price
+    const boundsError = validateBounds(price, {
+      min,
+      max,
+      step,
+      current,
+      aucType: fixture.show.main.auc_type,
+    })
 
     if (boundsError) {
       return HttpResponse.json(
@@ -112,9 +118,15 @@ export const betHandlers = [
 
 function validateBounds(
   price: number,
-  bounds: { min: number | null; max: number | null; step: number | null },
+  bounds: {
+    min: number | null
+    max: number | null
+    step: number | null
+    current: number | null
+    aucType: string
+  },
 ) {
-  const { min, max, step } = bounds
+  const { min, max, step, current, aucType } = bounds
 
   if (min != null && price < min) return `Ставка не может быть меньше ${min} ₽`
   if (max != null && price > max) return `Ставка не может быть больше ${max} ₽`
@@ -125,6 +137,10 @@ function validateBounds(
     if (Math.abs(steps - Math.round(steps)) > 1e-6)
       return `Ставка должна быть кратна шагу ${step} ₽`
   }
+  if (aucType === 'Up' && current != null && price <= current)
+    return `Ставка должна быть выше текущей цены ${current} ₽`
+  if (aucType === 'Down' && current != null && price >= current)
+    return `Ставка должна быть ниже текущей цены ${current} ₽`
 
   return null
 }

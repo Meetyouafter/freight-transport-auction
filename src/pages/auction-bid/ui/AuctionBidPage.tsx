@@ -75,6 +75,8 @@ export function AuctionBidPage() {
           min={price.min}
           max={price.max}
           step={price.step}
+          current={price.current}
+          aucType={main.auc_type}
           defaultPrice={
             trading.your.last_bet_with_vat ?? trading.your.last_bet ?? price.current ?? 0
           }

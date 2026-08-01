@@ -12,7 +12,7 @@ import {
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { auctionQueryOptions } from '@entities/auction'
+import { auctionQueryOptions, type AuctionType } from '@entities/auction'
 import { setBet } from '@entities/bet'
 import { ApiError } from '@shared/api/http'
 import { formatPrice } from '@shared/lib/format/formatPrice'
@@ -24,6 +24,8 @@ interface BidFormProps {
   min?: number | null
   max?: number | null
   step?: number | null
+  current?: number | null
+  aucType?: AuctionType
   defaultPrice?: number
   disabled?: boolean
   disabledReason?: string
@@ -46,6 +48,8 @@ export function BidForm({
   min = null,
   max = null,
   step = null,
+  current = null,
+  aucType,
   defaultPrice = 0,
   disabled = false,
   disabledReason,
@@ -54,10 +58,13 @@ export function BidForm({
   const queryClient = useQueryClient()
   const { showSuccess, showError } = useToast()
   const [pendingValues, setPendingValues] = useState<BidFormValues | null>(null)
-  const hasBounds = min != null || max != null || step != null
+  const hasBounds = min != null || max != null || step != null || current != null
   const resolver = useMemo(
-    () => zodResolver(hasBounds ? createBidFormSchema({ min, max, step }) : bidFormSchema),
-    [hasBounds, min, max, step],
+    () =>
+      zodResolver(
+        hasBounds ? createBidFormSchema({ min, max, step, current, aucType }) : bidFormSchema,
+      ),
+    [hasBounds, min, max, step, current, aucType],
   )
   const {
     register,
