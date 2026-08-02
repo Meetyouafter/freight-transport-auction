@@ -1,5 +1,6 @@
 import { Menu, MenuItem, Stack, Typography } from '@mui/material'
 import { useState } from 'react'
+import { surfaceTokens } from '@shared/theme/tokens'
 import { AppButton } from '../AppButton/AppButton'
 
 interface PerPageSelectProps<T extends number> {
@@ -25,6 +26,7 @@ export function PerPageSelect<T extends number>({
       </Typography>
       <AppButton
         id="per-page-button"
+        variant="outlined"
         size="small"
         disabled={disabled}
         aria-label="Количество элементов на странице"
@@ -38,7 +40,12 @@ export function PerPageSelect<T extends number>({
         onClose={() => setAnchorEl(null)}
         slotProps={{
           paper: {
-            sx: { bgcolor: 'background.paper', border: 1, borderColor: 'divider', boxShadow: 4 },
+            sx: {
+              bgcolor: 'background.paper',
+              border: 1,
+              borderColor: 'divider',
+              boxShadow: surfaceTokens.cardShadow,
+            },
           },
           list: { 'aria-labelledby': 'per-page-button' },
         }}

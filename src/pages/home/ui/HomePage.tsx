@@ -1,3 +1,4 @@
+import GavelIcon from '@mui/icons-material/Gavel'
 import {
   Box,
   Container,
@@ -9,7 +10,7 @@ import {
 } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { listAuctions } from '@entities/auction'
+import { auctionsListQueryOptions } from '@entities/auction'
 import {
   AuctionFiltersPanel,
   filtersToSearch,
@@ -17,7 +18,7 @@ import {
   searchToFilters,
 } from '@features/auction-filters'
 import { ROUTES } from '@shared/config/routes'
-import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
+import { AppButton, EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
 import { DEFAULT_PAGE_SIZE, PER_PAGE_OPTIONS } from '../model/constants'
 import { AuctionListSkeleton } from './AuctionListSkeleton'
@@ -30,8 +31,7 @@ export function HomePage() {
   const page = search.page ?? 1
   const perPage = (search.per_page ?? DEFAULT_PAGE_SIZE) as (typeof PER_PAGE_OPTIONS)[number]
   const { data, isPending, isFetching, isError } = useQuery({
-    queryKey: ['auctions', page, perPage, appliedFilters],
-    queryFn: ({ signal }) => listAuctions({ ...appliedFilters, page, per_page: perPage }, signal),
+    ...auctionsListQueryOptions({ ...appliedFilters, page, per_page: perPage }),
     placeholderData: keepPreviousData,
   })
   const isRefetching = isFetching && !isPending
@@ -39,22 +39,15 @@ export function HomePage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Stack direction="row" sx={{ justifyContent: 'flex-end', mb: 1 }}>
-        <Box
+        <AppButton
           component={Link}
           to={ROUTES.myBets}
-          sx={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: 0.5,
-            textDecoration: 'none',
-            color: 'primary.main',
-            fontWeight: 600,
-          }}
+          variant="outlined"
+          size="small"
+          startIcon={<GavelIcon />}
         >
-          <Typography variant="body2" sx={{ fontWeight: 600 }}>
-            Мои ставки
-          </Typography>
-        </Box>
+          Мои ставки
+        </AppButton>
       </Stack>
 
       <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
@@ -94,9 +87,11 @@ export function HomePage() {
             {data.data.length === 0 && (
               <EmptyState
                 text={
-                  Object.values(appliedFilters).some((value) => value !== undefined)
-                    ? 'На текущий момент нет открытых аукционов, соответствующих выбранным фильтрам'
-                    : 'На текущий момент нет открытых аукционов'
+                  data.meta.total > 0
+                    ? `На этой странице нет заявок — доступны страницы 1–${data.meta.last_page}`
+                    : Object.values(appliedFilters).some((value) => value !== undefined)
+                      ? 'На текущий момент нет открытых аукционов, соответствующих выбранным фильтрам'
+                      : 'На текущий момент нет открытых аукционов'
                 }
               />
             )}
@@ -114,21 +109,23 @@ export function HomePage() {
               </>
             )}
 
-            {data.meta.total >= 10 && (
+            {data.meta.total > 0 && (
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
                 sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
               >
-                <Pagination
-                  count={data.meta.last_page}
-                  page={page}
-                  onChange={(_, value) =>
-                    navigate({ search: (prev) => ({ ...prev, page: value }) })
-                  }
-                  color="primary"
-                  disabled={isRefetching}
-                />
+                {data.meta.last_page > 1 && (
+                  <Pagination
+                    count={data.meta.last_page}
+                    page={Math.min(page, data.meta.last_page)}
+                    onChange={(_, value) =>
+                      navigate({ search: (prev) => ({ ...prev, page: value }) })
+                    }
+                    color="primary"
+                    disabled={isRefetching}
+                  />
+                )}
                 <PerPageSelect
                   options={PER_PAGE_OPTIONS}
                   value={perPage}

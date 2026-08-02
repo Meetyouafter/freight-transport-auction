@@ -2,8 +2,8 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Container, Skeleton, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { auctionQueryOptions } from '@entities/auction'
-import { BidForm } from '@features/bid-form'
+import { auctionErrorState, auctionQueryOptions } from '@entities/auction'
+import { BidForm, defaultBidPrice } from '@features/bid-form'
 import { ROUTES } from '@shared/config/routes'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { ErrorState, SectionCard } from '@shared/ui'
@@ -11,12 +11,12 @@ import { ErrorState, SectionCard } from '@shared/ui'
 export function AuctionBidPage() {
   const { auctionId } = useParams({ from: ROUTES.auctionBid })
   const navigate = useNavigate()
-  const { data, isPending, isError } = useQuery(auctionQueryOptions(auctionId))
+  const { data, isPending, isError, error } = useQuery(auctionQueryOptions(auctionId))
 
   if (isError) {
     return (
       <Container maxWidth="sm" sx={{ py: 4 }}>
-        <ErrorState title="Не удалось загрузить аукцион" />
+        <ErrorState {...auctionErrorState(error)} />
       </Container>
     )
   }
@@ -77,9 +77,13 @@ export function AuctionBidPage() {
           step={price.step}
           current={price.current}
           aucType={main.auc_type}
-          defaultPrice={
-            trading.your.last_bet_with_vat ?? trading.your.last_bet ?? price.current ?? 0
-          }
+          defaultPrice={defaultBidPrice({
+            aucType: main.auc_type,
+            current: price.current,
+            min: price.min,
+            max: price.max,
+            step: price.step,
+          })}
           disabled={!canSetBet}
           disabledReason={!canSetBet ? 'Ставки по этому аукциону недоступны' : undefined}
           onSuccess={() => navigate({ to: ROUTES.auctionDetails, params: { auctionId } })}

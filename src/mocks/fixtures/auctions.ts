@@ -1,13 +1,11 @@
-import type { AuctionListItem, AuctionShowResponse } from '@entities/auction'
-
-interface AuctionFixture {
-  listItem: AuctionListItem
-  show: AuctionShowResponse
-}
+import { auctionSeeds } from './auctionSeeds'
+import { makeAuctionFixture, type AuctionFixture } from './makeAuctionFixture'
 
 /**
  * In-memory auction records, mutated in place by the `bets` handler so that placing a bid is
  * reflected on subsequent `listAuctions` / `getAuction` calls within the same session.
+ * The three records below are hand-written, full-detail DTOs; the rest is generated from
+ * `auctionSeeds` to give pagination and the filter panel a realistic amount of data.
  */
 export const auctionFixtures: AuctionFixture[] = [
   {
@@ -88,7 +86,7 @@ export const auctionFixtures: AuctionFixture[] = [
         is_last_bet_with_vat: null,
         red_bet_with_vat: false,
         red_bet_no_vat: false,
-        price: { start: 30000, current: 30000, current_no_vat: 24590.16 },
+        price: { start: 30000, current: 30000, current_no_vat: 24590.16, step: 500 },
         your: { bet: false, last_bet: null },
       },
       payment: {
@@ -176,8 +174,8 @@ export const auctionFixtures: AuctionFixture[] = [
           available_no_vat: 24166,
           min: 20000,
           min_no_vat: 16666.67,
-          max: 30000,
-          max_no_vat: 25000,
+          max: 29500,
+          max_no_vat: 24180.33,
           step: 500,
           step_no_vat: 416.67,
           price_per_km: 16.39,
@@ -367,7 +365,7 @@ export const auctionFixtures: AuctionFixture[] = [
         is_last_bet_with_vat: true,
         red_bet_with_vat: false,
         red_bet_no_vat: false,
-        price: { start: 60000, current: 58000, current_no_vat: 47540.98 },
+        price: { start: 60000, current: 58000, current_no_vat: 47540.98, step: 1000 },
         your: { bet: true, last_bet: 58000 },
       },
       payment: {
@@ -460,8 +458,8 @@ export const auctionFixtures: AuctionFixture[] = [
           current_no_vat: 47540.98,
           available: 59000,
           available_no_vat: 48360.66,
-          min: 55000,
-          min_no_vat: 45081.97,
+          min: 59000,
+          min_no_vat: 48360.66,
           max: 65000,
           max_no_vat: 53278.69,
           step: 1000,
@@ -646,7 +644,7 @@ export const auctionFixtures: AuctionFixture[] = [
         is_last_bet_with_vat: true,
         red_bet_with_vat: false,
         red_bet_no_vat: false,
-        price: { start: 45000, current: 45000, current_no_vat: 36885.25 },
+        price: { start: 45000, current: 45000, current_no_vat: 36885.25, step: null },
         your: { bet: true, last_bet: 45000 },
       },
       payment: {
@@ -832,6 +830,7 @@ export const auctionFixtures: AuctionFixture[] = [
       hide_bets_history: false,
     },
   },
+  ...auctionSeeds.map(makeAuctionFixture),
 ]
 
 export function findAuctionFixture(auctionUuid: string) {

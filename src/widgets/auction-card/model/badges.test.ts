@@ -4,59 +4,26 @@ import { getPrimaryBadge, getSecondaryBadges } from './badges'
 import { MAX_SECONDARY_BADGES } from './constants'
 
 describe('getPrimaryBadge', () => {
-  it('returns the Confirmed badge when status_mobile is Confirmed', () => {
-    const auction = makeAuctionListItem({ trading: { status_mobile: 'Confirmed' } })
+  it('shows the auction status while trading is running', () => {
+    const auction = makeAuctionListItem({ trading: { status: 'Auction' } })
 
-    expect(getPrimaryBadge(auction)).toMatchObject({ variant: 'confirmed', label: 'Подтверждено' })
+    expect(getPrimaryBadge(auction)).toEqual({ variant: 'rising', label: 'Торги идут' })
   })
 
-  it('returns a Winner badge with an icon', () => {
-    const auction = makeAuctionListItem({ trading: { status_mobile: 'Winner' } })
-
-    const badge = getPrimaryBadge(auction)
-
-    expect(badge).toMatchObject({ variant: 'confirmed', label: 'Победитель' })
-    expect(badge?.icon).toBeDefined()
-  })
-
-  it('prioritizes status_mobile over a Canceled/Stopped auction status', () => {
+  it('shows a cancelled auction as cancelled regardless of the user status', () => {
     const auction = makeAuctionListItem({
       trading: { status_mobile: 'Confirmed', status: 'Canceled' },
-    })
-
-    expect(getPrimaryBadge(auction)?.label).toBe('Подтверждено')
-  })
-
-  it('falls back to the auction status when Canceled', () => {
-    const auction = makeAuctionListItem({
-      trading: { status_mobile: 'NotParticipating', status: 'Canceled' },
     })
 
     expect(getPrimaryBadge(auction)).toEqual({ variant: 'rejected', label: 'Отменён' })
   })
 
-  it('falls back to the auction status when Stopped', () => {
+  it('shows a stopped auction as stopped', () => {
     const auction = makeAuctionListItem({
       trading: { status_mobile: 'NotParticipating', status: 'Stopped' },
     })
 
     expect(getPrimaryBadge(auction)).toEqual({ variant: 'rejected', label: 'Остановлен' })
-  })
-
-  it('returns a Losing badge when the user is losing', () => {
-    const auction = makeAuctionListItem({
-      trading: { status_mobile: 'Losing', status: 'Auction' },
-    })
-
-    expect(getPrimaryBadge(auction)).toEqual({ variant: 'rejected', label: 'Проигрываю' })
-  })
-
-  it('returns null when nothing warrants a primary badge', () => {
-    const auction = makeAuctionListItem({
-      trading: { status_mobile: 'NotParticipating', status: 'Auction' },
-    })
-
-    expect(getPrimaryBadge(auction)).toBeNull()
   })
 })
 
@@ -69,12 +36,15 @@ describe('getSecondaryBadges', () => {
     expect(badges[0]).toEqual({ variant: 'waiting', label: 'На понижение' })
   })
 
-  it('marks a bid as placed when the user has bid', () => {
-    const auction = makeAuctionListItem()
+  it('shows the auction type, the trading status and the bid flag at the same time', () => {
+    const auction = makeAuctionListItem({
+      main: { auc_type: 'Up' },
+      trading: { status: 'Auction', status_mobile: 'Leading' },
+    })
 
-    const badges = getSecondaryBadges(auction, true)
+    const labels = getSecondaryBadges(auction, true).map((badge) => badge.label)
 
-    expect(badges.some((badge) => badge.label === 'Ставка сделана')).toBe(true)
+    expect(labels).toEqual(['На повышение', 'Лидирую', 'Ставка сделана'])
   })
 
   it('marks that no bid was placed otherwise', () => {
@@ -85,12 +55,13 @@ describe('getSecondaryBadges', () => {
     expect(badges.some((badge) => badge.label === 'Моей ставки нет')).toBe(true)
   })
 
-  it('adds a waiting-for-deal badge when status is WaitDeal', () => {
-    const auction = makeAuctionListItem({ trading: { status: 'WaitDeal' } })
+  it('gives the winning status a trophy icon', () => {
+    const auction = makeAuctionListItem({ trading: { status_mobile: 'Winner' } })
 
-    const badges = getSecondaryBadges(auction, false)
+    const badge = getSecondaryBadges(auction, true).find((item) => item.label === 'Победитель')
 
-    expect(badges.some((badge) => badge.label === 'Ожидание сделки')).toBe(true)
+    expect(badge?.variant).toBe('confirmed')
+    expect(badge?.icon).toBeDefined()
   })
 
   it('never returns more than MAX_SECONDARY_BADGES badges', () => {

@@ -29,7 +29,8 @@ Stack: React 19, TypeScript, Vite, TanStack Router (file-based), TanStack Query,
 ## Styling: MUI + tokens only
 
 - No raw hex, inline `style={}` colors, or hand-written CSS.
-- `src/shared/theme/tokens.ts` is the only place hex values appear. New colors/spacing/radius go there first, then `theme.palette.*`/`theme.spacing()`/`theme.shape.borderRadius` via `sx`/`styled()`.
+- `src/shared/theme/tokens.ts` is the only place hex/rgba values appear. New colors/spacing/radius go there first, then `theme.palette.*`/`theme.spacing()`/`theme.shape.borderRadius` via `sx`/`styled()`.
+- `accentTokens` is reserved for the primary CTA (the contained MUI button); borders and elevations come from `surfaceTokens`, not raw `boxShadow: 4`.
 - Build from MUI components; compose custom primitives in `shared/ui/` if needed.
 
 ## Forms / server state / client state

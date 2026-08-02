@@ -37,6 +37,13 @@ describe('auctionFiltersSearchSchema', () => {
   it('accepts an empty search', () => {
     expect(auctionFiltersSearchSchema.parse({})).toEqual({})
   })
+
+  it('normalises digit-only params that parseSearch turns into numbers', () => {
+    expect(auctionFiltersSearchSchema.parse({ cargo_num: 12345, price_from: 1000 })).toEqual({
+      cargo_num: '12345',
+      price_from: '1000',
+    })
+  })
 })
 
 describe('filtersToSearch / searchToFilters round trip', () => {

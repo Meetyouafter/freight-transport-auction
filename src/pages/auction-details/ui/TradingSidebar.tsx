@@ -1,6 +1,6 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
 import type { AuctionShowTrading, AuctionType } from '@entities/auction'
-import { BidForm } from '@features/bid-form'
+import { BidForm, defaultBidPrice } from '@features/bid-form'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { colorTokens } from '@shared/theme/tokens'
 import { StatusBadge } from '@widgets/auction-card'
@@ -34,7 +34,13 @@ export function TradingSidebar({
         </Stack>
         {price.available != null && (
           <Typography variant="caption" sx={{ color: colorTokens.moss, display: 'block' }}>
-            Стартовая цена организатора: {formatPrice(price.available)}
+            Доступная цена: {formatPrice(price.available)}
+            {price.available_no_vat != null && ` (${formatPrice(price.available_no_vat)} без НДС)`}
+          </Typography>
+        )}
+        {price.start != null && (
+          <Typography variant="caption" sx={{ color: colorTokens.moss, display: 'block' }}>
+            Стартовая цена организатора: {formatPrice(price.start)}
           </Typography>
         )}
       </Box>
@@ -42,6 +48,13 @@ export function TradingSidebar({
       <Divider />
 
       <MyBetStatus trading={trading} />
+
+      {trading.allow_counter_bets && (
+        <Typography variant="caption" sx={{ color: colorTokens.moss }}>
+          Организатор допускает встречные ставки: после определения победителя вашу цену могут
+          попросить пересмотреть.
+        </Typography>
+      )}
 
       <Divider />
 
@@ -52,7 +65,13 @@ export function TradingSidebar({
         step={price.step}
         current={price.current}
         aucType={aucType}
-        defaultPrice={trading.your.last_bet_with_vat ?? trading.your.last_bet ?? price.current ?? 0}
+        defaultPrice={defaultBidPrice({
+          aucType,
+          current: price.current,
+          min: price.min,
+          max: price.max,
+          step: price.step,
+        })}
         disabled={!canSetBet}
         disabledReason={dealDisabledReason(trading)}
         onSuccess={onBidSuccess}

@@ -9,7 +9,7 @@ import { auctionQueryOptions, type AuctionListItem } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
 import { formatDate } from '@shared/lib/format/formatDate'
 import { formatPrice } from '@shared/lib/format/formatPrice'
-import { cardTokens } from '@shared/theme/tokens'
+import { cardTokens, surfaceTokens } from '@shared/theme/tokens'
 import { AppButton, IconText } from '@shared/ui'
 import { getPrimaryBadge, getSecondaryBadges } from '../model/badges'
 import { getPrimaryAction } from '../model/primaryAction'
@@ -43,8 +43,8 @@ export function AuctionCard({ auction }: AuctionCardProps) {
           ? cardTokens.finishedBg
           : hasMyBid
             ? cardTokens.participatingBg
-            : 'transparent',
-        boxShadow: isFinished ? 1 : 4,
+            : 'background.paper',
+        boxShadow: surfaceTokens.cardShadow,
         cursor: 'pointer',
         transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
         '&:hover': {
@@ -52,9 +52,9 @@ export function AuctionCard({ auction }: AuctionCardProps) {
             ? cardTokens.finishedBg
             : hasMyBid
               ? cardTokens.participatingBg
-              : 'action.hover',
-          borderColor: 'primary.main',
-          boxShadow: isFinished ? 2 : 4,
+              : 'background.paper',
+          borderColor: surfaceTokens.cardBorderHover,
+          boxShadow: surfaceTokens.cardShadowHover,
         },
       }}
       onClick={goToDetails}
@@ -131,14 +131,18 @@ export function AuctionCard({ auction }: AuctionCardProps) {
           <Typography sx={{ fontSize: { xs: 22, sm: 24 }, fontWeight: 500, color: 'text.primary' }}>
             {formatPrice(trading.price?.current)}
           </Typography>
-          {main.price_per_km != null && (
-            <Typography
-              variant="body2"
-              sx={{ color: 'primary.dark', fontWeight: 700, display: 'block' }}
-            >
-              {main.price_per_km} ₽/км
-            </Typography>
-          )}
+          <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap', rowGap: 0.25 }}>
+            {main.price_per_km != null && (
+              <Typography variant="body2" sx={{ color: 'primary.dark', fontWeight: 700 }}>
+                {main.price_per_km} ₽/км
+              </Typography>
+            )}
+            {trading.price?.step != null && (
+              <Typography variant="body2" color="text.secondary">
+                Шаг {formatPrice(trading.price.step)}
+              </Typography>
+            )}
+          </Stack>
         </Box>
 
         <Stack direction="row" spacing={1}>

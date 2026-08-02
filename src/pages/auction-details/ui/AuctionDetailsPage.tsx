@@ -3,10 +3,10 @@ import { Box, Container, Drawer, Skeleton, Stack, Typography } from '@mui/materi
 import { useQuery } from '@tanstack/react-query'
 import { Link, useParams } from '@tanstack/react-router'
 import { useState } from 'react'
-import { auctionQueryOptions } from '@entities/auction'
+import { auctionErrorState, auctionQueryOptions } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
 import { formatPrice } from '@shared/lib/format/formatPrice'
-import { cardTokens } from '@shared/theme/tokens'
+import { cardTokens, surfaceTokens } from '@shared/theme/tokens'
 import { ErrorState } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 import { dealStatusBadge, participationBadge } from '../model/statusMaps'
@@ -31,12 +31,12 @@ function DetailsSkeleton() {
 export function AuctionDetailsPage() {
   const { auctionId } = useParams({ from: ROUTES.auctionDetailsId })
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
-  const { data, isPending, isError } = useQuery(auctionQueryOptions(auctionId))
+  const { data, isPending, isError, error } = useQuery(auctionQueryOptions(auctionId))
 
   if (isError) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
-        <ErrorState title="Не удалось загрузить аукцион" />
+        <ErrorState {...auctionErrorState(error)} />
       </Container>
     )
   }
@@ -70,7 +70,7 @@ export function AuctionDetailsPage() {
               px: 0.5,
               mx: -0.5,
               transition: 'background-color 150ms ease',
-              '&:hover': { bgcolor: 'rgba(84,83,51,0.08)' },
+              '&:hover': { bgcolor: surfaceTokens.hoverOverlay },
             }}
           >
             <ArrowBackIcon sx={{ fontSize: 18 }} />
@@ -121,7 +121,7 @@ export function AuctionDetailsPage() {
             borderColor: 'divider',
             borderRadius: 2,
             bgcolor: cardTokens.participatingBg,
-            boxShadow: 4,
+            boxShadow: surfaceTokens.cardShadow,
           }}
         >
           <TradingSidebar auctionUuid={main.order_uid} aucType={main.auc_type} trading={trading} />
@@ -144,10 +144,10 @@ export function AuctionDetailsPage() {
           bgcolor: cardTokens.participatingBg,
           borderTop: 1,
           borderColor: 'divider',
-          boxShadow: 4,
+          boxShadow: surfaceTokens.cardShadow,
           cursor: 'pointer',
           transition: 'background-color 150ms ease',
-          '&:hover': { bgcolor: 'rgba(84,83,51,0.06)' },
+          '&:hover': { bgcolor: surfaceTokens.hoverOverlay },
         }}
         onClick={() => setMobileSidebarOpen(true)}
       >

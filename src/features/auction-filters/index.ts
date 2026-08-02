@@ -1,5 +1,6 @@
 export { AuctionFiltersPanel } from './ui/AuctionFiltersPanel'
 export { mapFiltersToRequest } from './model/mapFiltersToRequest'
+export { BODY_TYPE_OPTIONS } from './model/options'
 export {
   auctionFiltersFormSchema,
   defaultAuctionFiltersFormValues,

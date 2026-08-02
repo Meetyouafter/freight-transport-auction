@@ -1,19 +1,36 @@
 import { HttpResponse } from 'msw'
+import type { ProblemDetail, ValidationError } from '@shared/api/problemDetail'
 
-export function unauthorizedResponse() {
+/**
+ * The spec serves every error as `application/problem+json`, so the mocks do too — otherwise the
+ * `Content-Type` contract can never be checked against the real backend.
+ */
+const PROBLEM_JSON_HEADERS = { 'Content-Type': 'application/problem+json' }
+
+function traceId() {
+  return crypto.randomUUID()
+}
+
+export function problemResponse(status: number, problem: Omit<ProblemDetail, 'trace_id'>) {
   return HttpResponse.json(
-    { code: 'unauthorized', title: 'Не авторизован', message: 'Требуется авторизация' },
-    { status: 401 },
+    { ...problem, trace_id: traceId() },
+    { status, headers: PROBLEM_JSON_HEADERS },
   )
 }
 
-export function serviceUnavailableResponse() {
+export function notFoundResponse(message: string) {
+  return problemResponse(404, { code: 'resource_not_found', title: 'Не найдено', message })
+}
+
+export function validationProblemResponse(errors: ValidationError[]) {
   return HttpResponse.json(
     {
-      code: 'service_unavailable',
-      title: 'Сервис недоступен',
-      message: 'Мок: сервис временно недоступен',
+      code: 'validation_failed',
+      title: 'Ошибка валидации',
+      message: 'Запрос содержит некорректные поля.',
+      trace_id: traceId(),
+      errors,
     },
-    { status: 503 },
+    { status: 422, headers: PROBLEM_JSON_HEADERS },
   )
 }

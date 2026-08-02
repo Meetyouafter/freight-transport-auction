@@ -1,4 +1,4 @@
-import { HttpResponse, delay, http } from 'msw'
+import { HttpResponse, http } from 'msw'
 import {
   AUCTIONS_LIST_PATH,
   AUCTION_STATUS_IDS,
@@ -8,14 +8,7 @@ import {
 } from '@entities/auction'
 import { API_BASE_URL } from '@shared/api/http'
 import { auctionFixtures, findAuctionFixture } from '../fixtures/auctions'
-import {
-  MOCK_DELAY_MS,
-  MOCK_EMPTY,
-  MOCK_ERROR,
-  MOCK_UNAUTHORIZED,
-  MOCK_UNAVAILABLE,
-} from '../utils/mockFlags'
-import { serviceUnavailableResponse, unauthorizedResponse } from '../utils/problemResponses'
+import { notFoundResponse, validationProblemResponse } from '../utils/problemResponses'
 
 function matchesFilters(
   item: AuctionListItem,
@@ -93,38 +86,16 @@ function sortItems(
 
 export const auctionHandlers = [
   http.post(`${API_BASE_URL}${AUCTIONS_LIST_PATH}`, async ({ request }) => {
-    await delay(MOCK_DELAY_MS)
-
-    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
-    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
-
-    if (MOCK_ERROR) {
-      return HttpResponse.json(
-        {
-          code: 'internal_error',
-          title: 'Ошибка сервера',
-          message: 'Мок: имитация серверной ошибки',
-        },
-        { status: 500 },
-      )
-    }
-
     const body = request.body ? await request.json().catch(() => ({})) : {}
     const parsed = auctionListRequestSchema.safeParse(body)
 
     if (!parsed.success) {
-      return HttpResponse.json(
-        {
-          code: 'validation_failed',
-          title: 'Ошибка валидации',
-          message: 'Запрос содержит некорректные поля.',
-          errors: parsed.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message,
-            code: issue.code,
-          })),
-        },
-        { status: 422 },
+      return validationProblemResponse(
+        parsed.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+          code: issue.code,
+        })),
       )
     }
 
@@ -132,14 +103,12 @@ export const auctionHandlers = [
     const page = filters.page ?? 1
     const perPage = filters.per_page ?? 20
 
-    const filtered = MOCK_EMPTY
-      ? []
-      : sortItems(
-          auctionFixtures
-            .map((fixture) => fixture.listItem)
-            .filter((item) => matchesFilters(item, filters)),
-          filters,
-        )
+    const filtered = sortItems(
+      auctionFixtures
+        .map((fixture) => fixture.listItem)
+        .filter((item) => matchesFilters(item, filters)),
+      filters,
+    )
     const start = (page - 1) * perPage
     const data = filtered.slice(start, start + perPage)
 
@@ -157,17 +126,11 @@ export const auctionHandlers = [
   }),
 
   http.get(`${API_BASE_URL}${auctionPath(':auctionUuid')}`, ({ params }) => {
-    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
-    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
-
     const auctionUuid = params.auctionUuid as string
     const fixture = findAuctionFixture(auctionUuid)
 
     if (!fixture) {
-      return HttpResponse.json(
-        { code: 'resource_not_found', title: 'Не найдено', message: 'Аукцион не найден' },
-        { status: 404 },
-      )
+      return notFoundResponse('Аукцион не найден')
     }
 
     return HttpResponse.json(fixture.show)

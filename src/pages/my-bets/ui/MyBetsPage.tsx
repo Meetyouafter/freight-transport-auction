@@ -2,7 +2,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Container, LinearProgress, Pagination, Stack, Typography } from '@mui/material'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useSearch } from '@tanstack/react-router'
-import { listAuctions } from '@entities/auction'
+import { auctionsListQueryOptions } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
 import { EmptyState, ErrorState, PerPageSelect } from '@shared/ui'
 import { AuctionCard } from '@widgets/auction-card'
@@ -15,8 +15,7 @@ export function MyBetsPage() {
   const page = search.page ?? 1
   const perPage = (search.per_page ?? DEFAULT_PAGE_SIZE) as (typeof PER_PAGE_OPTIONS)[number]
   const { data, isPending, isFetching, isError } = useQuery({
-    queryKey: ['auctions', 'my-bets', page, perPage],
-    queryFn: ({ signal }) => listAuctions({ is_bidder: true, page, per_page: perPage }, signal),
+    ...auctionsListQueryOptions({ is_bidder: true, page, per_page: perPage }),
     placeholderData: keepPreviousData,
   })
   const isRefetching = isFetching && !isPending
@@ -62,7 +61,15 @@ export function MyBetsPage() {
               transition: 'opacity 0.15s ease',
             }}
           >
-            {data.data.length === 0 && <EmptyState text="Вы пока не участвовали в аукционах" />}
+            {data.data.length === 0 && (
+              <EmptyState
+                text={
+                  data.meta.total > 0
+                    ? `На этой странице нет заявок — доступны страницы 1–${data.meta.last_page}`
+                    : 'Вы пока не участвовали в аукционах'
+                }
+              />
+            )}
 
             {data.data.length > 0 && (
               <>
@@ -77,21 +84,23 @@ export function MyBetsPage() {
               </>
             )}
 
-            {data.meta.total >= 10 && (
+            {data.meta.total > 0 && (
               <Stack
                 direction={{ xs: 'column', sm: 'row' }}
                 spacing={2}
                 sx={{ alignItems: 'center', justifyContent: 'center', mt: 3 }}
               >
-                <Pagination
-                  count={data.meta.last_page}
-                  page={page}
-                  onChange={(_, value) =>
-                    navigate({ search: (prev) => ({ ...prev, page: value }) })
-                  }
-                  color="primary"
-                  disabled={isRefetching}
-                />
+                {data.meta.last_page > 1 && (
+                  <Pagination
+                    count={data.meta.last_page}
+                    page={Math.min(page, data.meta.last_page)}
+                    onChange={(_, value) =>
+                      navigate({ search: (prev) => ({ ...prev, page: value }) })
+                    }
+                    color="primary"
+                    disabled={isRefetching}
+                  />
+                )}
                 <PerPageSelect
                   options={PER_PAGE_OPTIONS}
                   value={perPage}

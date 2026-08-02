@@ -95,6 +95,7 @@ export const auctionListItemTradingPriceSchema = z.object({
   start: z.number(),
   current: z.number(),
   current_no_vat: z.number(),
+  step: z.number().nullable().optional(),
 })
 
 /** `AuctionListItemTradingYour`. */

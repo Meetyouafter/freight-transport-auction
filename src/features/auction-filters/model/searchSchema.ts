@@ -4,20 +4,22 @@ import { CITIES } from '@entities/city'
 import { paginationSearchSchema } from '@shared/lib/pagination/paginationSearchSchema'
 import { defaultAuctionFiltersFormValues, type AuctionFiltersFormValues } from './schema'
 
+const searchString = z.union([z.string(), z.number()]).transform(String).optional().catch(undefined)
+
 export const auctionFiltersSearchSchema = z
   .object({
-    cargo_num: z.string().optional().catch(undefined),
-    customer: z.string().optional().catch(undefined),
+    cargo_num: searchString,
+    customer: searchString,
     auc_type: z.array(auctionTypeFilterSchema).optional().catch(undefined),
     status: z.array(tradingStatusSchema).optional().catch(undefined),
     statuses: z.array(z.number().int()).optional().catch(undefined),
     body_types: z.array(z.string()).optional().catch(undefined),
     load_gc_id: z.number().int().optional().catch(undefined),
     unload_gc_id: z.number().int().optional().catch(undefined),
-    load_date_from: z.string().optional().catch(undefined),
-    load_date_to: z.string().optional().catch(undefined),
-    price_from: z.string().optional().catch(undefined),
-    price_to: z.string().optional().catch(undefined),
+    load_date_from: searchString,
+    load_date_to: searchString,
+    price_from: searchString,
+    price_to: searchString,
     is_favorite: z.boolean().optional().catch(undefined),
     is_bidder: z.boolean().optional().catch(undefined),
     is_available: z.boolean().optional().catch(undefined),

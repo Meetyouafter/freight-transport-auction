@@ -1,5 +1,5 @@
 import { Paper, Typography } from '@mui/material'
-import { cardTokens } from '@shared/theme/tokens'
+import { cardTokens, surfaceTokens } from '@shared/theme/tokens'
 
 interface SectionCardProps {
   title: string
@@ -14,7 +14,7 @@ export function SectionCard({ title, children }: SectionCardProps) {
       sx={{
         p: { xs: 2, sm: 3 },
         borderRadius: 2,
-        boxShadow: 4,
+        boxShadow: surfaceTokens.cardShadow,
         bgcolor: cardTokens.participatingBg,
       }}
     >

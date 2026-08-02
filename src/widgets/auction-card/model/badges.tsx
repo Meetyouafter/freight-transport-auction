@@ -8,6 +8,7 @@ import {
   AUCTION_TYPE_VARIANTS,
   TRADING_STATUS_MOBILE_LABELS,
   type AuctionListItem,
+  type ListItemTradingStatusMobile,
 } from '@entities/auction'
 import type { StatusTokenKey } from '@shared/theme/tokens'
 import { MAX_SECONDARY_BADGES } from './constants'
@@ -18,54 +19,54 @@ export interface Badge {
   icon?: React.ReactNode
 }
 
-export function getPrimaryBadge(auction: AuctionListItem): Badge | null {
-  const { trading } = auction
-
-  if (trading.status_mobile === 'Confirmed') {
-    return { variant: 'confirmed', label: TRADING_STATUS_MOBILE_LABELS.Confirmed }
-  }
-  if (trading.status_mobile === 'Winner') {
-    return {
-      variant: 'confirmed',
-      label: TRADING_STATUS_MOBILE_LABELS.Winner,
-      icon: <EmojiEventsIcon sx={{ fontSize: 14 }} />,
-    }
-  }
-  if (trading.status === 'Canceled' || trading.status === 'Stopped') {
-    return {
-      variant: AUCTION_STATUS_VARIANTS[trading.status],
-      label: AUCTION_STATUS_LABELS[trading.status],
-    }
-  }
-  if (trading.status_mobile === 'Losing') {
-    return { variant: 'rejected', label: TRADING_STATUS_MOBILE_LABELS.Losing }
-  }
-
-  return null
+const TRADING_STATUS_VARIANTS: Record<ListItemTradingStatusMobile, StatusTokenKey> = {
+  NotParticipating: 'neutral',
+  Leading: 'rising',
+  Losing: 'rejected',
+  Winner: 'confirmed',
+  Confirmed: 'confirmed',
+  Unknown: 'neutral',
 }
 
+/** The auction's own lifecycle status — always shown, so the card never hides where trading is. */
+export function getPrimaryBadge(auction: AuctionListItem): Badge {
+  const { status } = auction.trading
+
+  return {
+    variant: AUCTION_STATUS_VARIANTS[status],
+    label: AUCTION_STATUS_LABELS[status],
+  }
+}
+
+/**
+ * ТЗ asks for the auction type, the user's trading status and the "do I have a bid" flag to be
+ * readable at the same time, so these are separate badges instead of one changing badge.
+ */
 export function getSecondaryBadges(auction: AuctionListItem, hasMyBid: boolean): Badge[] {
   const { main, trading } = auction
   const badges: Badge[] = [
     { variant: AUCTION_TYPE_VARIANTS[main.auc_type], label: AUCTION_TYPE_LABELS[main.auc_type] },
+    tradingStatusBadge(trading.status_mobile),
+    hasMyBid
+      ? {
+          variant: 'confirmed',
+          label: 'Ставка сделана',
+          icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />,
+        }
+      : {
+          variant: 'neutral',
+          label: 'Моей ставки нет',
+          icon: <RemoveCircleOutlineIcon sx={{ fontSize: 14 }} />,
+        },
   ]
 
-  if (trading.status === 'WaitDeal') {
-    badges.push({ variant: 'waiting', label: 'Ожидание сделки' })
-  }
-  if (hasMyBid) {
-    badges.push({
-      variant: 'confirmed',
-      label: 'Ставка сделана',
-      icon: <CheckCircleOutlineIcon sx={{ fontSize: 14 }} />,
-    })
-  } else {
-    badges.push({
-      variant: 'neutral',
-      label: 'Моей ставки нет',
-      icon: <RemoveCircleOutlineIcon sx={{ fontSize: 14 }} />,
-    })
-  }
-
   return badges.slice(0, MAX_SECONDARY_BADGES)
+}
+
+function tradingStatusBadge(status: ListItemTradingStatusMobile): Badge {
+  return {
+    variant: TRADING_STATUS_VARIANTS[status],
+    label: TRADING_STATUS_MOBILE_LABELS[status],
+    icon: status === 'Winner' ? <EmojiEventsIcon sx={{ fontSize: 14 }} /> : undefined,
+  }
 }

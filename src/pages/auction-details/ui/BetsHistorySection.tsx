@@ -70,6 +70,9 @@ export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionPr
 
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                       {bet.is_win && <StatusBadge variant="confirmed" label="Победитель" />}
+                      {bet.is_counter && (
+                        <StatusBadge tone="outline" variant="neutral" label="Встречная" />
+                      )}
                       {bet.is_rejected && <StatusBadge variant="rejected" label="Отменена" />}
                     </Stack>
                   </Stack>

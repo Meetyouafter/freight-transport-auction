@@ -3,6 +3,9 @@ export const colorTokens = {
   beige: '#D9D7B6',
   moss: '#878672',
   olive: '#545333',
+  clay: '#A24B14',
+  clayDark: '#7E3A0F',
+  clayTint: '#F7E7DC',
 } as const
 
 export const paletteTokens = {
@@ -45,6 +48,21 @@ export type StatusTokenKey = keyof typeof statusTokens
 export const cardTokens = {
   participatingBg: '#F2EFC4',
   finishedBg: statusTokens.neutral.tint,
+} as const
+
+export const accentTokens = {
+  main: colorTokens.clay,
+  dark: colorTokens.clayDark,
+  tint: colorTokens.clayTint,
+  contrastText: '#FFFFFF',
+} as const
+
+export const surfaceTokens = {
+  cardBorder: 'rgba(84,83,51,0.38)',
+  cardBorderHover: 'rgba(84,83,51,0.6)',
+  hoverOverlay: 'rgba(84,83,51,0.08)',
+  cardShadow: '0 1px 2px rgba(42,42,28,0.08), 0 6px 16px -8px rgba(42,42,28,0.28)',
+  cardShadowHover: '0 2px 4px rgba(42,42,28,0.1), 0 12px 24px -10px rgba(42,42,28,0.36)',
 } as const
 
 export const spacingTokenBaseUnit = 8

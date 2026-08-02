@@ -1,5 +1,5 @@
 export { getAuction, auctionQueryOptions } from './api/getAuction'
-export { listAuctions } from './api/listAuctions'
+export { listAuctions, auctionsListQueryOptions } from './api/listAuctions'
 export {
   auctionTypeSchema,
   auctionTypeFilterSchema,
@@ -49,6 +49,7 @@ export {
   OPERATION_TYPE_LABELS,
 } from './model/labels'
 export { AUCTIONS_LIST_PATH, auctionPath } from './model/apiRoutes'
+export { auctionErrorState } from './model/errorState'
 export type {
   AuctionShowResponse,
   AuctionShowTrading,

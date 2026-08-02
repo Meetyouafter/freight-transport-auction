@@ -3,21 +3,18 @@ import { betsPath, setBetRequestSchema } from '@entities/bet'
 import { API_BASE_URL } from '@shared/api/http'
 import { findAuctionFixture } from '../fixtures/auctions'
 import { addBet, getBets } from '../fixtures/bets'
-import { MOCK_UNAUTHORIZED, MOCK_UNAVAILABLE } from '../utils/mockFlags'
-import { serviceUnavailableResponse, unauthorizedResponse } from '../utils/problemResponses'
+import {
+  notFoundResponse,
+  problemResponse,
+  validationProblemResponse,
+} from '../utils/problemResponses'
 
 export const betHandlers = [
   http.get(`${API_BASE_URL}${betsPath(':auctionUuid')}`, ({ params, request }) => {
-    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
-    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
-
     const auctionUuid = params.auctionUuid as string
 
     if (!findAuctionFixture(auctionUuid)) {
-      return HttpResponse.json(
-        { code: 'resource_not_found', title: 'Не найдено', message: 'Аукцион не найден' },
-        { status: 404 },
-      )
+      return notFoundResponse('Аукцион не найден')
     }
 
     const includeCancelled = new URL(request.url).searchParams.get('all') === 'true'
@@ -26,47 +23,32 @@ export const betHandlers = [
   }),
 
   http.post(`${API_BASE_URL}${betsPath(':auctionUuid')}`, async ({ params, request }) => {
-    if (MOCK_UNAUTHORIZED) return unauthorizedResponse()
-    if (MOCK_UNAVAILABLE) return serviceUnavailableResponse()
-
     const auctionUuid = params.auctionUuid as string
     const fixture = findAuctionFixture(auctionUuid)
 
     if (!fixture) {
-      return HttpResponse.json(
-        { code: 'resource_not_found', title: 'Не найдено', message: 'Аукцион не найден' },
-        { status: 404 },
-      )
+      return notFoundResponse('Аукцион не найден')
     }
 
     const body: unknown = await request.json().catch(() => ({}))
     const parsed = setBetRequestSchema.safeParse(body)
 
     if (!parsed.success) {
-      return HttpResponse.json(
-        {
-          code: 'validation_failed',
-          title: 'Ошибка валидации',
-          message: 'Запрос содержит некорректные поля.',
-          errors: parsed.error.issues.map((issue) => ({
-            field: issue.path.join('.'),
-            message: issue.message,
-            code: issue.code,
-          })),
-        },
-        { status: 422 },
+      return validationProblemResponse(
+        parsed.error.issues.map((issue) => ({
+          field: issue.path.join('.'),
+          message: issue.message,
+          code: issue.code,
+        })),
       )
     }
 
     if (!fixture.show.trading.can_set_bet) {
-      return HttpResponse.json(
-        {
-          code: 'bet_not_allowed',
-          title: 'Ставка невозможна',
-          message: 'Аукцион не принимает ставки',
-        },
-        { status: 422 },
-      )
+      return problemResponse(422, {
+        code: 'bet_not_allowed',
+        title: 'Ставка невозможна',
+        message: 'Аукцион не принимает ставки',
+      })
     }
 
     const { price } = parsed.data
@@ -80,15 +62,9 @@ export const betHandlers = [
     })
 
     if (boundsError) {
-      return HttpResponse.json(
-        {
-          code: 'validation_failed',
-          title: 'Ошибка валидации',
-          message: 'Запрос содержит некорректные поля.',
-          errors: [{ field: 'price', message: boundsError, code: 'out_of_bounds' }],
-        },
-        { status: 422 },
-      )
+      return validationProblemResponse([
+        { field: 'price', message: boundsError, code: 'out_of_bounds' },
+      ])
     }
 
     const bet = addBet(auctionUuid, fixture.show.main.id, price)
@@ -97,6 +73,7 @@ export const betHandlers = [
       start: fixture.listItem.trading.price?.start ?? price,
       current: price,
       current_no_vat: bet.price_no_vat,
+      step,
     }
     fixture.listItem.trading.your = { bet: true, last_bet: price }
     fixture.listItem.trading.status_mobile = 'Leading'

@@ -14,6 +14,7 @@ import {
 } from '@mui/material'
 import { Controller, useForm } from 'react-hook-form'
 import { CITIES, type City } from '@entities/city'
+import { surfaceTokens } from '@shared/theme/tokens'
 import { AppButton } from '@shared/ui'
 import { useFiltersPanelStore } from '../model/filtersPanelStore'
 import { mapFiltersToRequest } from '../model/mapFiltersToRequest'
@@ -112,7 +113,7 @@ export function AuctionFiltersPanel({ values, onApply, onReset }: AuctionFilters
             mt: 2,
             mx: { xs: -2, sm: 0 },
             bgcolor: 'transparent',
-            boxShadow: 4,
+            boxShadow: surfaceTokens.cardShadow,
           }}
         >
           <Stack spacing={2}>

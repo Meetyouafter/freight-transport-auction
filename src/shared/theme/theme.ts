@@ -1,5 +1,11 @@
 import { createTheme } from '@mui/material/styles'
-import { paletteTokens, shapeTokens, spacingTokenBaseUnit } from './tokens'
+import {
+  accentTokens,
+  paletteTokens,
+  shapeTokens,
+  spacingTokenBaseUnit,
+  surfaceTokens,
+} from './tokens'
 
 export const theme = createTheme({
   palette: {
@@ -26,24 +32,29 @@ export const theme = createTheme({
     MuiButton: {
       styleOverrides: {
         root: {
+          fontWeight: 600,
           transition: 'background-color 150ms ease, box-shadow 150ms ease, border-color 150ms ease',
         },
         contained: {
+          backgroundColor: accentTokens.main,
+          color: accentTokens.contrastText,
+          boxShadow: surfaceTokens.cardShadow,
           '&:hover': {
-            backgroundColor: paletteTokens.primary.dark,
-            boxShadow:
-              '0px 3px 5px -1px rgba(0,0,0,0.2), 0px 6px 10px 0px rgba(0,0,0,0.14), 0px 1px 18px 0px rgba(0,0,0,0.12)',
+            backgroundColor: accentTokens.dark,
+            boxShadow: surfaceTokens.cardShadowHover,
           },
         },
         outlined: {
+          borderColor: paletteTokens.primary.main,
+          color: paletteTokens.primary.main,
           '&:hover': {
-            backgroundColor: 'rgba(84,83,51,0.08)',
-            borderColor: paletteTokens.primary.main,
+            backgroundColor: surfaceTokens.hoverOverlay,
+            borderColor: paletteTokens.primary.dark,
           },
         },
         text: {
           '&:hover': {
-            backgroundColor: 'rgba(84,83,51,0.08)',
+            backgroundColor: surfaceTokens.hoverOverlay,
           },
         },
       },
@@ -51,7 +62,7 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         outlined: {
-          borderColor: 'rgba(84,83,51,0.24)',
+          borderColor: surfaceTokens.cardBorder,
         },
       },
     },
