@@ -1,16 +1,16 @@
 import { Box } from '@mui/material'
 import type { ReactNode } from 'react'
-import { statusTokens, type StatusTokenKey } from '@shared/theme/tokens'
+import type { BadgePalette } from '@shared/theme/tokens'
 
 interface StatusBadgeProps {
-  variant: StatusTokenKey
+  palette: BadgePalette
   label: string
   icon?: ReactNode
   tone?: 'solid' | 'outline'
 }
 
-export function StatusBadge({ variant, label, icon, tone = 'solid' }: StatusBadgeProps) {
-  const { fill, tint, text } = statusTokens[variant]
+export function StatusBadge({ palette, label, icon, tone = 'solid' }: StatusBadgeProps) {
+  const { bg, tint, text } = palette
 
   return (
     <Box
@@ -19,7 +19,7 @@ export function StatusBadge({ variant, label, icon, tone = 'solid' }: StatusBadg
         display: 'inline-flex',
         alignItems: 'center',
         gap: 0.5,
-        bgcolor: tone === 'solid' ? fill : tint,
+        bgcolor: tone === 'solid' ? bg : (tint ?? bg),
         border: tone === 'outline' ? '1.5px solid' : 'none',
         borderColor: text,
         color: text,

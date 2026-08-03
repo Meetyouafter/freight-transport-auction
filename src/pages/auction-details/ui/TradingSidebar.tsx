@@ -1,5 +1,5 @@
 import { Box, Divider, Stack, Typography } from '@mui/material'
-import type { AuctionShowTrading, AuctionType } from '@entities/auction'
+import { betUnavailableReason, type AuctionShowTrading, type AuctionType } from '@entities/auction'
 import { BidForm, defaultBidPrice } from '@features/bid-form'
 import { formatPrice } from '@shared/lib/format/formatPrice'
 import { colorTokens } from '@shared/theme/tokens'
@@ -73,17 +73,9 @@ export function TradingSidebar({
           step: price.step,
         })}
         disabled={!canSetBet}
-        disabledReason={dealDisabledReason(trading)}
+        disabledReason={betUnavailableReason(trading)}
         onSuccess={onBidSuccess}
       />
     </Stack>
   )
-}
-
-function dealDisabledReason(trading: AuctionShowTrading) {
-  if (trading.status === 'Finished' || trading.status === 'WaitDeal') return 'Торги закрыты'
-  if (trading.status === 'Canceled') return 'Аукцион отменён'
-  if (trading.status === 'Stopped') return 'Аукцион остановлен'
-
-  return 'У вас нет доступа к участию в торгах'
 }

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { listBets } from '@entities/bet'
 import { formatDateTime } from '@shared/lib/format/formatDate'
 import { formatPrice } from '@shared/lib/format/formatPrice'
+import { statusTokens } from '@shared/theme/tokens'
 import { EmptyState, RestrictedField, SectionCard } from '@shared/ui'
 import { StatusBadge } from '@widgets/auction-card'
 
@@ -69,11 +70,19 @@ export function BetsHistorySection({ auctionUuid, hidden }: BetsHistorySectionPr
                     </Stack>
 
                     <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
-                      {bet.is_win && <StatusBadge variant="confirmed" label="Победитель" />}
-                      {bet.is_counter && (
-                        <StatusBadge tone="outline" variant="neutral" label="Встречная" />
+                      {bet.is_win && (
+                        <StatusBadge palette={statusTokens.confirmed} label="Победитель" />
                       )}
-                      {bet.is_rejected && <StatusBadge variant="rejected" label="Отменена" />}
+                      {bet.is_counter && (
+                        <StatusBadge
+                          tone="outline"
+                          palette={statusTokens.neutral}
+                          label="Встречная"
+                        />
+                      )}
+                      {bet.is_rejected && (
+                        <StatusBadge palette={statusTokens.rejected} label="Отменена" />
+                      )}
                     </Stack>
                   </Stack>
 

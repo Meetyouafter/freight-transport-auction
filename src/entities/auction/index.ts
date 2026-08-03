@@ -40,7 +40,6 @@ export {
 } from './model/show'
 export {
   AUCTION_STATUS_LABELS,
-  AUCTION_STATUS_VARIANTS,
   AUCTION_STATUS_IDS,
   AUCTION_TYPE_LABELS,
   AUCTION_TYPE_VARIANTS,
@@ -48,6 +47,7 @@ export {
   PAYMENT_DELAY_TYPE_LABELS,
   OPERATION_TYPE_LABELS,
 } from './model/labels'
+export { betUnavailableReason } from './model/betAvailability'
 export { AUCTIONS_LIST_PATH, auctionPath } from './model/apiRoutes'
 export { auctionErrorState } from './model/errorState'
 export type {

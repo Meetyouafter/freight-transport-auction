@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { auctionStatusTokens, statusTokens } from '@shared/theme/tokens'
 import { makeAuctionListItem } from './auctionListItem.fixture'
 import { getPrimaryBadge, getSecondaryBadges } from './badges'
 import { MAX_SECONDARY_BADGES } from './constants'
@@ -7,7 +8,10 @@ describe('getPrimaryBadge', () => {
   it('shows the auction status while trading is running', () => {
     const auction = makeAuctionListItem({ trading: { status: 'Auction' } })
 
-    expect(getPrimaryBadge(auction)).toEqual({ variant: 'rising', label: 'Торги идут' })
+    expect(getPrimaryBadge(auction)).toEqual({
+      palette: auctionStatusTokens.Auction,
+      label: 'Торги идут',
+    })
   })
 
   it('shows a cancelled auction as cancelled regardless of the user status', () => {
@@ -15,7 +19,10 @@ describe('getPrimaryBadge', () => {
       trading: { status_mobile: 'Confirmed', status: 'Canceled' },
     })
 
-    expect(getPrimaryBadge(auction)).toEqual({ variant: 'rejected', label: 'Отменён' })
+    expect(getPrimaryBadge(auction)).toEqual({
+      palette: auctionStatusTokens.Canceled,
+      label: 'Отменён',
+    })
   })
 
   it('shows a stopped auction as stopped', () => {
@@ -23,7 +30,10 @@ describe('getPrimaryBadge', () => {
       trading: { status_mobile: 'NotParticipating', status: 'Stopped' },
     })
 
-    expect(getPrimaryBadge(auction)).toEqual({ variant: 'rejected', label: 'Остановлен' })
+    expect(getPrimaryBadge(auction)).toEqual({
+      palette: auctionStatusTokens.Stopped,
+      label: 'Остановлен',
+    })
   })
 })
 
@@ -33,7 +43,7 @@ describe('getSecondaryBadges', () => {
 
     const badges = getSecondaryBadges(auction, false)
 
-    expect(badges[0]).toEqual({ variant: 'waiting', label: 'На понижение' })
+    expect(badges[0]).toEqual({ palette: statusTokens.waiting, label: 'На понижение' })
   })
 
   it('shows the auction type, the trading status and the bid flag at the same time', () => {
@@ -60,7 +70,7 @@ describe('getSecondaryBadges', () => {
 
     const badge = getSecondaryBadges(auction, true).find((item) => item.label === 'Победитель')
 
-    expect(badge?.variant).toBe('confirmed')
+    expect(badge?.palette).toBe(statusTokens.confirmed)
     expect(badge?.icon).toBeDefined()
   })
 

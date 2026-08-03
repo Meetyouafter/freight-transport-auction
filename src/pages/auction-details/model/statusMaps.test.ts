@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { auctionStatusTokens, statusTokens } from '@shared/theme/tokens'
 import { makeAuctionShowTrading } from './auctionShowTrading.fixture'
 import {
   auctionDirectionBadge,
@@ -8,15 +9,24 @@ import {
 } from './statusMaps'
 
 describe('dealStatusBadge', () => {
-  it('maps a deal status to its label and variant', () => {
-    expect(dealStatusBadge('Auction')).toEqual({ variant: 'rising', label: 'Торги идут' })
-    expect(dealStatusBadge('Canceled')).toEqual({ variant: 'rejected', label: 'Отменён' })
+  it('maps a deal status to its label and palette', () => {
+    expect(dealStatusBadge('Auction')).toEqual({
+      palette: auctionStatusTokens.Auction,
+      label: 'Торги идут',
+    })
+    expect(dealStatusBadge('Canceled')).toEqual({
+      palette: auctionStatusTokens.Canceled,
+      label: 'Отменён',
+    })
   })
 })
 
 describe('participationBadge', () => {
   it('maps a known trading status to a badge', () => {
-    expect(participationBadge('Leading')).toEqual({ variant: 'rising', label: 'Лидирую' })
+    expect(participationBadge('Leading')).toEqual({
+      palette: statusTokens.rising,
+      label: 'Лидирую',
+    })
   })
 
   it('returns null for a status with no participation badge', () => {
@@ -28,13 +38,13 @@ describe('auctionDirectionBadge', () => {
   it('shows an "up" indicator for an Up auction while trading is live', () => {
     const badge = auctionDirectionBadge('Up', 'Auction')
 
-    expect(badge).toMatchObject({ variant: 'rising', label: 'На повышение' })
+    expect(badge).toMatchObject({ palette: statusTokens.rising, label: 'На повышение' })
   })
 
   it('shows a "down" indicator for a Down auction while trading is live', () => {
     const badge = auctionDirectionBadge('Down', 'Auction')
 
-    expect(badge).toMatchObject({ variant: 'neutral', label: 'На понижение' })
+    expect(badge).toMatchObject({ palette: statusTokens.neutral, label: 'На понижение' })
   })
 
   it('returns null once trading is no longer in the Auction phase', () => {
@@ -53,7 +63,10 @@ describe('myBetStatus', () => {
       your: { bet: false, last_bet: null, last_bet_with_vat: null, win: false },
     })
 
-    expect(myBetStatus(trading)).toEqual({ variant: 'neutral', label: 'Вы не участвуете' })
+    expect(myBetStatus(trading)).toEqual({
+      palette: statusTokens.neutral,
+      label: 'Вы не участвуете',
+    })
   })
 
   it('reports a win regardless of status_mobile', () => {
@@ -62,7 +75,7 @@ describe('myBetStatus', () => {
       status_mobile: 'Losing',
     })
 
-    expect(myBetStatus(trading)).toEqual({ variant: 'confirmed', label: 'Вы выиграли' })
+    expect(myBetStatus(trading)).toEqual({ palette: statusTokens.confirmed, label: 'Вы выиграли' })
   })
 
   it('reports being outbid, preferring the VAT-inclusive amount', () => {
@@ -72,7 +85,7 @@ describe('myBetStatus', () => {
     })
 
     expect(myBetStatus(trading)).toEqual({
-      variant: 'waiting',
+      palette: statusTokens.waiting,
       label: 'Ваша ставка: 1200 ₽ — перебита',
       hint: 'Текущая цена ниже вашей — обновите ставку',
     })
@@ -94,7 +107,7 @@ describe('myBetStatus', () => {
     })
 
     expect(myBetStatus(trading)).toEqual({
-      variant: 'rising',
+      palette: statusTokens.rising,
       label: 'Ваша ставка: 1000 ₽ — лидирует',
     })
   })
@@ -106,7 +119,7 @@ describe('myBetStatus', () => {
       status: 'Finished',
     })
 
-    expect(myBetStatus(trading)).toEqual({ variant: 'rejected', label: 'Вы проиграли' })
+    expect(myBetStatus(trading)).toEqual({ palette: statusTokens.rejected, label: 'Вы проиграли' })
   })
 
   it('reports a neutral placed-bid status otherwise', () => {
@@ -116,6 +129,9 @@ describe('myBetStatus', () => {
       status: 'DeterminateWinner',
     })
 
-    expect(myBetStatus(trading)).toEqual({ variant: 'neutral', label: 'Ваша ставка: 1000 ₽' })
+    expect(myBetStatus(trading)).toEqual({
+      palette: statusTokens.neutral,
+      label: 'Ваша ставка: 1000 ₽',
+    })
   })
 })

@@ -36,18 +36,44 @@ export const shapeTokens = {
   borderRadius: 8,
 } as const
 
+/** Colours of a status badge: `bg` fills the solid tone, `tint` the outline one. */
+export interface BadgePalette {
+  text: string
+  bg: string
+  /** Muted fill for the outline tone — falls back to `bg` when a palette has no tint. */
+  tint?: string
+}
+
+/** Semantic badge palette — how something is going, regardless of which entity it describes. */
 export const statusTokens = {
-  confirmed: { fill: '#C7E1F9', tint: '#EDF5FC', text: '#0C447C' },
-  rising: { fill: '#CDE7AE', tint: '#EFF6E6', text: '#1F4006' },
-  waiting: { fill: '#F5D999', tint: '#FBF1DE', text: '#593206' },
-  rejected: { fill: '#F5BFBF', tint: '#FCECEC', text: '#791F1F' },
-  neutral: { fill: '#DEDACB', tint: '#F1EFE8', text: '#46453F' },
+  confirmed: { bg: '#C7E1F9', tint: '#EDF5FC', text: '#0C447C' },
+  rising: { bg: '#CDE7AE', tint: '#EFF6E6', text: '#1F4006' },
+  waiting: { bg: '#F5D999', tint: '#FBF1DE', text: '#593206' },
+  rejected: { bg: '#F5BFBF', tint: '#FCECEC', text: '#791F1F' },
+  neutral: { bg: '#DEDACB', tint: '#F1EFE8', text: '#46453F' },
 } as const
 export type StatusTokenKey = keyof typeof statusTokens
 
+/**
+ * One distinct pair per auction lifecycle status. The semantic palette above only has five tones,
+ * so it had to double up statuses; here every status is told apart by colour alone.
+ * Keys mirror `AuctionStatus` — `shared` cannot import the entity, so they are spelled out.
+ */
+export const auctionStatusTokens = {
+  Planning: { text: '#5B6472', bg: '#E4E7EB' },
+  Auction: { text: '#1D5FCC', bg: '#DCE8FF' },
+  DeterminateWinner: { text: '#7A34C9', bg: '#EBE0FA' },
+  WaitDeal: { text: '#9C5800', bg: '#FCEACB' },
+  InProgress: { text: '#0B6459', bg: '#D7F1EA' },
+  Finished: { text: '#187A42', bg: '#DCF3E4' },
+  Stopped: { text: '#9A4A15', bg: '#F7E2CE' },
+  Canceled: { text: '#C22A2A', bg: '#FBDFDF' },
+  /** Parse fallback, not a real state — borrows the neutral grey of `Planning`. */
+  Unknown: { text: '#5B6472', bg: '#E4E7EB' },
+} as const
+
 export const cardTokens = {
   participatingBg: '#F2EFC4',
-  finishedBg: statusTokens.neutral.tint,
 } as const
 
 export const accentTokens = {

@@ -12,7 +12,7 @@ export function MyBetStatus({ trading }: MyBetStatusProps) {
 
   return (
     <Stack spacing={0.5}>
-      <StatusBadge variant={status.variant} label={status.label} tone="solid" />
+      <StatusBadge palette={status.palette} label={status.label} tone="solid" />
       {status.hint && (
         <Typography variant="caption" color="text.secondary">
           {status.hint}

@@ -9,9 +9,10 @@ import { auctionQueryOptions, type AuctionListItem } from '@entities/auction'
 import { ROUTES } from '@shared/config/routes'
 import { formatDate } from '@shared/lib/format/formatDate'
 import { formatPrice } from '@shared/lib/format/formatPrice'
-import { cardTokens, surfaceTokens } from '@shared/theme/tokens'
+import { surfaceTokens } from '@shared/theme/tokens'
 import { AppButton, IconText } from '@shared/ui'
 import { getPrimaryBadge, getSecondaryBadges } from '../model/badges'
+import { getCardSurface } from '../model/cardSurface'
 import { getPrimaryAction } from '../model/primaryAction'
 import { StatusBadge } from './StatusBadge'
 
@@ -24,7 +25,7 @@ export function AuctionCard({ auction }: AuctionCardProps) {
   const queryClient = useQueryClient()
   const { main, route, cargo, trading } = auction
   const hasMyBid = Boolean(trading.your?.bet)
-  const isFinished = trading.status_mobile === 'Winner'
+  const surface = getCardSurface(trading.status_mobile)
   const primaryBadge = getPrimaryBadge(auction)
   const secondaryBadges = getSecondaryBadges(auction, hasMyBid)
   const primaryAction = getPrimaryAction(auction)
@@ -39,21 +40,14 @@ export function AuctionCard({ auction }: AuctionCardProps) {
       variant="outlined"
       sx={{
         borderRadius: '12px',
-        bgcolor: isFinished
-          ? cardTokens.finishedBg
-          : hasMyBid
-            ? cardTokens.participatingBg
-            : 'background.paper',
+        bgcolor: surface.bg,
+        borderColor: surface.border,
         boxShadow: surfaceTokens.cardShadow,
         cursor: 'pointer',
         transition: 'background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease',
         '&:hover': {
-          bgcolor: isFinished
-            ? cardTokens.finishedBg
-            : hasMyBid
-              ? cardTokens.participatingBg
-              : 'background.paper',
-          borderColor: surfaceTokens.cardBorderHover,
+          bgcolor: surface.bg,
+          borderColor: surface.borderHover,
           boxShadow: surfaceTokens.cardShadowHover,
         },
       }}

@@ -26,7 +26,8 @@ export function ToastProvider({ children }: PropsWithChildren) {
         open={toast != null}
         autoHideDuration={4000}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        sx={{ bottom: (theme) => theme.spacing(2), right: (theme) => theme.spacing(2) }}
       >
         {toast ? (
           <Alert

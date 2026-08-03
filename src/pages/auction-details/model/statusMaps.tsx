@@ -2,33 +2,32 @@ import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward'
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward'
 import {
   AUCTION_STATUS_LABELS,
-  AUCTION_STATUS_VARIANTS,
   type AuctionShowTrading,
   type AuctionStatus,
   type AuctionType,
   type TradingStatus,
 } from '@entities/auction'
 import { formatPrice } from '@shared/lib/format/formatPrice'
-import type { StatusTokenKey } from '@shared/theme/tokens'
+import { auctionStatusTokens, statusTokens, type BadgePalette } from '@shared/theme/tokens'
 
 interface StatusLabel {
-  variant: StatusTokenKey
+  palette: BadgePalette
   label: string
 }
 
 /** Бейдж статуса сделки — шапка страницы, `AuctionShowTrading.status`. */
 export function dealStatusBadge(status: AuctionStatus): StatusLabel {
-  return { variant: AUCTION_STATUS_VARIANTS[status], label: AUCTION_STATUS_LABELS[status] }
+  return { palette: auctionStatusTokens[status], label: AUCTION_STATUS_LABELS[status] }
 }
 
 const PARTICIPATION_LABELS: Partial<Record<TradingStatus, StatusLabel>> = {
-  Leading: { variant: 'rising', label: 'Лидирую' },
-  Losing: { variant: 'rejected', label: 'Перебили' },
-  OnPending: { variant: 'waiting', label: 'На рассмотрении' },
-  ChoosingWinner: { variant: 'waiting', label: 'Выбор победителя' },
-  Winner: { variant: 'confirmed', label: 'Выиграл' },
-  Confirmed: { variant: 'confirmed', label: 'Подтверждено' },
-  Accepted: { variant: 'confirmed', label: 'Принято' },
+  Leading: { palette: statusTokens.rising, label: 'Лидирую' },
+  Losing: { palette: statusTokens.rejected, label: 'Перебили' },
+  OnPending: { palette: statusTokens.waiting, label: 'На рассмотрении' },
+  ChoosingWinner: { palette: statusTokens.waiting, label: 'Выбор победителя' },
+  Winner: { palette: statusTokens.confirmed, label: 'Выиграл' },
+  Confirmed: { palette: statusTokens.confirmed, label: 'Подтверждено' },
+  Accepted: { palette: statusTokens.confirmed, label: 'Принято' },
 }
 
 /** Бейдж статуса своего участия — только если пользователь участвует в торгах. */
@@ -49,14 +48,14 @@ export function auctionDirectionBadge(
 
   if (aucType === 'Up') {
     return {
-      variant: 'rising',
+      palette: statusTokens.rising,
       label: 'На повышение',
       icon: <ArrowUpwardIcon sx={{ fontSize: 14 }} />,
     }
   }
   if (aucType === 'Down') {
     return {
-      variant: 'neutral',
+      palette: statusTokens.neutral,
       label: 'На понижение',
       icon: <ArrowDownwardIcon sx={{ fontSize: 14 }} />,
     }
@@ -74,17 +73,17 @@ export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
   const { your, status_mobile } = trading
 
   if (!your.bet) {
-    return { variant: 'neutral', label: 'Вы не участвуете' }
+    return { palette: statusTokens.neutral, label: 'Вы не участвуете' }
   }
 
   const amount = your.last_bet_with_vat ?? your.last_bet
 
   if (your.win) {
-    return { variant: 'confirmed', label: 'Вы выиграли' }
+    return { palette: statusTokens.confirmed, label: 'Вы выиграли' }
   }
   if (status_mobile === 'Losing') {
     return {
-      variant: 'waiting',
+      palette: statusTokens.waiting,
       label:
         amount != null ? `Ваша ставка: ${formatPrice(amount)} — перебита` : 'Ваша ставка перебита',
       hint: 'Текущая цена ниже вашей — обновите ставку',
@@ -92,17 +91,17 @@ export function myBetStatus(trading: AuctionShowTrading): MyBetStatus {
   }
   if (status_mobile === 'Leading') {
     return {
-      variant: 'rising',
+      palette: statusTokens.rising,
       label:
         amount != null ? `Ваша ставка: ${formatPrice(amount)} — лидирует` : 'Ваша ставка лидирует',
     }
   }
   if (trading.status === 'Finished') {
-    return { variant: 'rejected', label: 'Вы проиграли' }
+    return { palette: statusTokens.rejected, label: 'Вы проиграли' }
   }
 
   return {
-    variant: 'neutral',
+    palette: statusTokens.neutral,
     label: amount != null ? `Ваша ставка: ${formatPrice(amount)}` : 'Ставка размещена',
   }
 }

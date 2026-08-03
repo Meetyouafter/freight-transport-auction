@@ -11,7 +11,18 @@
     "typecheck": "tsc -b",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepare": "msw init public/ --save"
+    "prepare": "husky && msw init public/ --save"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "*.css": [
+      "stylelint --fix"
+    ],
+    "*.{js,jsx,ts,tsx,css,md,json}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -47,6 +58,8 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",
     "globals": "^17.8.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
     "msw": "^2.15.0",
     "prettier": "^3.9.6",
     "stylelint": "^17.14.1",

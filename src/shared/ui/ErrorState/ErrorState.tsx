@@ -1,6 +1,6 @@
 import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlineOutlined'
 import { Box, Stack, Typography } from '@mui/material'
-import { Link } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { ROUTES } from '@shared/config/routes'
 import { AppButton } from '../AppButton/AppButton'
 
@@ -13,6 +13,9 @@ export function ErrorState({
   title = 'Возникла ошибка.',
   description = 'Наши разработчики уже занимаются решением проблемы.',
 }: ErrorStateProps) {
+  const { pathname } = useLocation()
+  const isHome = pathname === ROUTES.home
+
   return (
     <Box
       sx={{
@@ -29,9 +32,15 @@ export function ErrorState({
         <ErrorOutlineIcon color="error" fontSize="large" />
         <Typography variant="subtitle1">{title}</Typography>
         <Typography color="text.secondary">{description}</Typography>
-        <AppButton component={Link} to={ROUTES.home} size="large" sx={{ mt: 2 }}>
-          Вернуться на главную
-        </AppButton>
+        {isHome ? (
+          <AppButton onClick={() => window.location.reload()} size="large" sx={{ mt: 2 }}>
+            Обновить страницу
+          </AppButton>
+        ) : (
+          <AppButton component={Link} to={ROUTES.home} size="large" sx={{ mt: 2 }}>
+            Вернуться на главную
+          </AppButton>
+        )}
       </Stack>
     </Box>
   )

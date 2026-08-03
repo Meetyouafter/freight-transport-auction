@@ -38,19 +38,6 @@ export const AUCTION_STATUS_LABELS: Record<AuctionStatus, string> = {
   Unknown: 'Неизвестно',
 }
 
-/** Canonical `AuctionStatus` → status-badge color variant. */
-export const AUCTION_STATUS_VARIANTS: Record<AuctionStatus, StatusTokenKey> = {
-  Planning: 'neutral',
-  Auction: 'rising',
-  DeterminateWinner: 'waiting',
-  WaitDeal: 'waiting',
-  InProgress: 'confirmed',
-  Finished: 'confirmed',
-  Stopped: 'rejected',
-  Canceled: 'rejected',
-  Unknown: 'neutral',
-}
-
 /** Canonical `AuctionStatus` → numeric id, as used by the `statuses` list filter and the API. */
 export const AUCTION_STATUS_IDS: Record<AuctionStatus, number> = {
   Unknown: 0,

@@ -2,7 +2,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack'
 import { Box, Container, Skeleton, Stack, Typography } from '@mui/material'
 import { useQuery } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import { auctionErrorState, auctionQueryOptions } from '@entities/auction'
+import { auctionErrorState, auctionQueryOptions, betUnavailableReason } from '@entities/auction'
 import { BidForm, defaultBidPrice } from '@features/bid-form'
 import { ROUTES } from '@shared/config/routes'
 import { formatPrice } from '@shared/lib/format/formatPrice'
@@ -85,7 +85,7 @@ export function AuctionBidPage() {
             step: price.step,
           })}
           disabled={!canSetBet}
-          disabledReason={!canSetBet ? 'Ставки по этому аукциону недоступны' : undefined}
+          disabledReason={!canSetBet ? betUnavailableReason(trading) : undefined}
           onSuccess={() => navigate({ to: ROUTES.auctionDetails, params: { auctionId } })}
         />
       </Box>
